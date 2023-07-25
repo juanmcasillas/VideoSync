@@ -6,6 +6,7 @@ __pycache__/
 # My Things
 cache/
 dev/
+samples/
 
 # C extensions
 *.so
