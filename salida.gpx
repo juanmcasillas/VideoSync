@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gpx xmlns="http://www.topografix.com/GPX/1/1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:wptx1="http://www.garmin.com/xmlschemas/WaypointExtension/v1" xmlns:gpxtrx="http://www.garmin.com/xmlschemas/GpxExtensions/v3" xmlns:gpxtpx="http://www.garmin.com/xmlschemas/TrackPointExtension/v2" xmlns:gpxx="http://www.garmin.com/xmlschemas/GpxExtensions/v3" xmlns:trp="http://www.garmin.com/xmlschemas/TripExtensions/v1" xmlns:adv="http://www.garmin.com/xmlschemas/AdventuresExtensions/v1" xmlns:prs="http://www.garmin.com/xmlschemas/PressureExtension/v1" xmlns:tmd="http://www.garmin.com/xmlschemas/TripMetaDataExtensions/v1" xmlns:vptm="http://www.garmin.com/xmlschemas/ViaPointTransportationModeExtensions/v1" xmlns:ctx="http://www.garmin.com/xmlschemas/CreationTimeExtension/v1" xmlns:gpxacc="http://www.garmin.com/xmlschemas/AccelerationExtension/v1" xmlns:gpxpx="http://www.garmin.com/xmlschemas/PowerExtension/v1" xmlns:vidx1="http://www.garmin.com/xmlschemas/VideoExtension/v1" creator="Garmin Desktop App" version="1.1" xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd http://www.garmin.com/xmlschemas/WaypointExtension/v1 http://www8.garmin.com/xmlschemas/WaypointExtensionv1.xsd http://www.garmin.com/xmlschemas/TrackPointExtension/v2 http://www.garmin.com/xmlschemas/TrackPointExtensionv2.xsd http://www.garmin.com/xmlschemas/GpxExtensions/v3 http://www8.garmin.com/xmlschemas/GpxExtensionsv3.xsd http://www.garmin.com/xmlschemas/ActivityExtension/v1 http://www8.garmin.com/xmlschemas/ActivityExtensionv1.xsd http://www.garmin.com/xmlschemas/AdventuresExtensions/v1 http://www8.garmin.com/xmlschemas/AdventuresExtensionv1.xsd http://www.garmin.com/xmlschemas/PressureExtension/v1 http://www.garmin.com/xmlschemas/PressureExtensionv1.xsd http://www.garmin.com/xmlschemas/TripExtensions/v1 http://www.garmin.com/xmlschemas/TripExtensionsv1.xsd http://www.garmin.com/xmlschemas/TripMetaDataExtensions/v1 http://www.garmin.com/xmlschemas/TripMetaDataExtensionsv1.xsd http://www.garmin.com/xmlschemas/ViaPointTransportationModeExtensions/v1 http://www.garmin.com/xmlschemas/ViaPointTransportationModeExtensionsv1.xsd http://www.garmin.com/xmlschemas/CreationTimeExtension/v1 http://www.garmin.com/xmlschemas/CreationTimeExtensionsv1.xsd http://www.garmin.com/xmlschemas/AccelerationExtension/v1 http://www.garmin.com/xmlschemas/AccelerationExtensionv1.xsd http://www.garmin.com/xmlschemas/PowerExtension/v1 http://www.garmin.com/xmlschemas/PowerExtensionv1.xsd http://www.garmin.com/xmlschemas/VideoExtension/v1 http://www.garmin.com/xmlschemas/VideoExtensionv1.xsd">
+<metadata>
+  <time>2016-07-06T18:40:30Z</time>
+</metadata>
+<trk>
+  <name>exercise</name>
+<trkseg>
+	<trkpt lat="40.401528999209404" lon="-4.252460254356265">
+		<ele>723.8</ele>
+		<time>2016-07-06T18:40:30Z</time>
+		<extensions>
+		<gpxtpx:TrackPointExtension>
+		    <gpxtpx:hr>125</gpxtpx:hr>
+		    <gpxtpx:cad>0</gpxtpx:cad>
+		    <gpxtpx:speed>10.842000008673601</gpxtpx:speed>
+		    <gpxtpx:distance>3241.52</gpxtpx:distance>
+		   </gpxtpx:TrackPointExtension>
+		<gpxx:TrackPointExtension/>
+		</extensions>
+	</trkpt>
+	<trkpt lat="40.401598988100886" lon="-4.2525493539869785">
+		<ele>723.5999999999999</ele>
+		<time>2016-07-06T18:40:31Z</time>
+		<extensions>
+		<gpxtpx:TrackPointExtension>
+		    <gpxtpx:hr>124</gpxtpx:hr>
+		    <gpxtpx:cad>0</gpxtpx:cad>
+		    <gpxtpx:speed>10.7020000085616</gpxtpx:speed>
+		    <gpxtpx:distance>3252.37</gpxtpx:distance>
+		   </gpxtpx:TrackPointExtension>
+		<gpxx:TrackPointExtension/>
+		</extensions>
+	</trkpt>
+	<trkpt lat="40.401669731363654" lon="-4.252638118341565">
+		<ele>723.5999999999999</ele>
+		<time>2016-07-06T18:40:32Z</time>
+		<extensions>
+		<gpxtpx:TrackPointExtension>
+		    <gpxtpx:hr>123</gpxtpx:hr>
+		    <gpxtpx:cad>0</gpxtpx:cad>
+		    <gpxtpx:speed>10.805000008644</gpxtpx:speed>
+		    <gpxtpx:distance>3263.25</gpxtpx:distance>
+		   </gpxtpx:TrackPointExtension>
+		<gpxx:TrackPointExtension/>
+		</extensions>
+	</trkpt>
+	<trkpt lat="40.4017414804548" lon="-4.252725625410676">
+		<ele>723.5999999999999</ele>
+		<time>2016-07-06T18:40:33Z</time>
+		<extensions>
+		<gpxtpx:TrackPointExtension>
+		    <gpxtpx:hr>123</gpxtpx:hr>
+		    <gpxtpx:cad>0</gpxtpx:cad>
+		    <gpxtpx:speed>10.814000008651199</gpxtpx:speed>
+		    <gpxtpx:distance>3274.14</gpxtpx:distance>
+		   </gpxtpx:TrackPointExtension>
+		<gpxx:TrackPointExtension/>
+		</extensions>
+	</trkpt>
+	<trkpt lat="40.40181314572692" lon="-4.252812378108501">
+		<ele>723.2</ele>
+		<time>2016-07-06T18:40:34Z</time>
+		<extensions>
+		<gpxtpx:TrackPointExtension>
+		    <gpxtpx:hr>118</gpxtpx:hr>
+		    <gpxtpx:cad>0</gpxtpx:cad>
+		    <gpxtpx:speed>10.693000008554398</gpxtpx:speed>
+		    <gpxtpx:distance>3284.99</gpxtpx:distance>
+		   </gpxtpx:TrackPointExtension>
+		<gpxx:TrackPointExtension/>
+		</extensions>
+	</trkpt>
+	<trkpt lat="40.40188564918935" lon="-4.2528987955302">
+		<ele>722.8</ele>
+		<time>2016-07-06T18:40:35Z</time>
+		<extensions>
+		<gpxtpx:TrackPointExtension>
+		    <gpxtpx:hr>116</gpxtpx:hr>
+		    <gpxtpx:cad>0</gpxtpx:cad>
+		    <gpxtpx:speed>10.8520000086816</gpxtpx:speed>
+		    <gpxtpx:distance>3295.88</gpxtpx:distance>
+		   </gpxtpx:TrackPointExtension>
+		<gpxx:TrackPointExtension/>
+		</extensions>
+	</trkpt>
+	<trkpt lat="40.401958990842104" lon="-4.252986218780279">
+		<ele>722.4000000000001</ele>
+		<time>2016-07-06T18:40:36Z</time>
+		<extensions>
+		<gpxtpx:TrackPointExtension>
+		    <gpxtpx:hr>113</gpxtpx:hr>
+		    <gpxtpx:cad>0</gpxtpx:cad>
+		    <gpxtpx:speed>10.945000008755999</gpxtpx:speed>
+		    <gpxtpx:distance>3306.9</gpxtpx:distance>
+		   </gpxtpx:TrackPointExtension>
+		<gpxx:TrackPointExtension/>
+		</extensions>
+	</trkpt>
+	<trkpt lat="40.40203241631389" lon="-4.25307422876358">
+		<ele>722.0</ele>
+		<time>2016-07-06T18:40:37Z</time>
+		<extensions>
+		<gpxtpx:TrackPointExtension>
+		    <gpxtpx:hr>110</gpxtpx:hr>
+		    <gpxtpx:cad>0</gpxtpx:cad>
+		    <gpxtpx:speed>10.9540000087632</gpxtpx:speed>
+		    <gpxtpx:distance>3317.96</gpxtpx:distance>
+		   </gpxtpx:TrackPointExtension>
+		<gpxx:TrackPointExtension/>
+		</extensions>
+	</trkpt>
+	<trkpt lat="40.402105171233416" lon="-4.253162490203977">
+		<ele>721.5999999999999</ele>
+		<time>2016-07-06T18:40:38Z</time>
+		<extensions>
+		<gpxtpx:TrackPointExtension>
+		    <gpxtpx:hr>109</gpxtpx:hr>
+		    <gpxtpx:cad>0</gpxtpx:cad>
+		    <gpxtpx:speed>10.945000008755999</gpxtpx:speed>
+		    <gpxtpx:distance>3328.97</gpxtpx:distance>
+		   </gpxtpx:TrackPointExtension>
+		<gpxx:TrackPointExtension/>
+		</extensions>
+	</trkpt>
+	<trkpt lat="40.40217733941972" lon="-4.253250835463405">
+		<ele>721.4000000000001</ele>
+		<time>2016-07-06T18:40:39Z</time>
+		<extensions>
+		<gpxtpx:TrackPointExtension>
+		    <gpxtpx:hr>106</gpxtpx:hr>
+		    <gpxtpx:cad>0</gpxtpx:cad>
+		    <gpxtpx:speed>11.010000008808</gpxtpx:speed>
+		    <gpxtpx:distance>3339.95</gpxtpx:distance>
+		   </gpxtpx:TrackPointExtension>
+		<gpxx:TrackPointExtension/>
+		</extensions>
+	</trkpt>
+	<trkpt lat="40.40225034579635" lon="-4.253340186551213">
+		<ele>721.2</ele>
+		<time>2016-07-06T18:40:40Z</time>
+		<extensions>
+		<gpxtpx:TrackPointExtension>
+		    <gpxtpx:hr>103</gpxtpx:hr>
+		    <gpxtpx:cad>0</gpxtpx:cad>
+		    <gpxtpx:speed>11.178000008942401</gpxtpx:speed>
+		    <gpxtpx:distance>3351.05</gpxtpx:distance>
+		   </gpxtpx:TrackPointExtension>
+		<gpxx:TrackPointExtension/>
+		</extensions>
+	</trkpt>
+	<trkpt lat="40.4023236874491" lon="-4.253431046381593">
+		<ele>720.8</ele>
+		<time>2016-07-06T18:40:41Z</time>
+		<extensions>
+		<gpxtpx:TrackPointExtension>
+		    <gpxtpx:hr>101</gpxtpx:hr>
+		    <gpxtpx:cad>0</gpxtpx:cad>
+		    <gpxtpx:speed>11.197000008957598</gpxtpx:speed>
+		    <gpxtpx:distance>3362.27</gpxtpx:distance>
+		   </gpxtpx:TrackPointExtension>
+		<gpxx:TrackPointExtension/>
+		</extensions>
+	</trkpt>
+	<trkpt lat="40.40239677764475" lon="-4.253522744402289">
+		<ele>720.5999999999999</ele>
+		<time>2016-07-06T18:40:42Z</time>
+		<extensions>
+		<gpxtpx:TrackPointExtension>
+		    <gpxtpx:hr>99</gpxtpx:hr>
+		    <gpxtpx:cad>0</gpxtpx:cad>
+		    <gpxtpx:speed>11.3370000090696</gpxtpx:speed>
+		    <gpxtpx:distance>3373.52</gpxtpx:distance>
+		   </gpxtpx:TrackPointExtension>
+		<gpxx:TrackPointExtension/>
+		</extensions>
+	</trkpt>
+	<trkpt lat="40.40246953256428" lon="-4.253616705536842">
+		<ele>720.4000000000001</ele>
+		<time>2016-07-06T18:40:43Z</time>
+		<extensions>
+		<gpxtpx:TrackPointExtension>
+		    <gpxtpx:hr>96</gpxtpx:hr>
+		    <gpxtpx:cad>0</gpxtpx:cad>
+		    <gpxtpx:speed>11.393000009114399</gpxtpx:speed>
+		    <gpxtpx:distance>3384.87</gpxtpx:distance>
+		   </gpxtpx:TrackPointExtension>
+		<gpxx:TrackPointExtension/>
+		</extensions>
+	</trkpt>
+</trkseg>
+</trk>
+</gpx>

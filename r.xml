@@ -1,0 +1,266 @@
+<?xml version="1.0" encoding="ASCII" standalone="yes"?>
+<configuration>
+
+<preferences  units="metric">
+<default_color>#FFFFFF80</default_color>
+<default_font>
+    <path>resources/fonts/BebasNeue.otf</path>
+    <size>36</size>
+</default_font>
+</preferences>
+
+<layout>
+
+
+<picture>
+    <position x="LEFT+20" y="BOTTOM-250" />
+    <img width="40" height="40" alpha="200" png="resources/white/slope.png" />
+</picture>
+
+
+<slope label="SLOPE %" metric="slope" halign="LEFT">
+    <position x="LEFT+70" y="BOTTOM-260" />
+    <colors>
+        <title>DEFAULT</title>
+        <value>DEFAULT</value>
+    </colors>
+    <fonts>
+    <title fontname="DEFAULT" size="DEFAULT-20" />
+    <value fontname="DEFAULT" size="DEFAULT+5" />
+    </fonts>
+</slope>
+
+
+<picture>
+    <position x="LEFT+20" y="BOTTOM-190" />
+    <img width="40" height="40" alpha="200" png="resources/white/distance.png" />
+</picture>
+
+
+<distance label="DISTANCE (M)" metric="distance" halign="LEFT">
+    <position x="LEFT+70" y="BOTTOM-200" />
+    <colors>
+        <title>DEFAULT</title>
+        <value>DEFAULT</value>
+    </colors>
+    <fonts>
+    <title fontname="DEFAULT" size="DEFAULT-20" />
+    <value fontname="DEFAULT" size="DEFAULT+5" />
+    </fonts>
+</distance>
+
+<picture>
+    <position x="LEFT+20" y="BOTTOM-130" />
+    <img width="40" height="40" alpha="200" png="resources/white/altitude.png" />
+</picture>
+
+<elevation label="ALT (m)" metric="elevation" halign="LEFT">
+    <position x="LEFT+70" y="BOTTOM-140" />
+    <colors>
+        <title>DEFAULT</title>
+        <value>DEFAULT</value>
+    </colors>
+    <fonts>
+    <title fontname="DEFAULT" size="DEFAULT-20" />
+    <value fontname="DEFAULT" size="DEFAULT+5" />
+    </fonts>
+</elevation>
+
+<picture>
+    <position x="LEFT+20" y="BOTTOM-65" />
+    <img width="40" height="40" alpha="200" png="resources/white/speed.png" />
+</picture>
+
+<speed label="KM/H" metric="speed" halign="LEFT">
+    <position x="LEFT+70" y="BOTTOM-80" />
+    <colors>
+        <title>DEFAULT</title>
+        <value>DEFAULT</value>
+    </colors>
+    <fonts>
+    <title fontname="DEFAULT" size="DEFAULT-18" />
+    <value fontname="DEFAULT" size="DEFAULT+18" />
+    </fonts>
+</speed>
+
+<label metric="title" halign="CENTER">
+    <position x="CX" y="BOTTOM-25" />
+    <colors>
+        <title>DEFAULT</title>
+        <value>DEFAULT</value>
+    </colors>
+    <fonts>
+    <value fontname="DEFAULT" size="DEFAULT-10" />
+    </fonts>
+</label>
+
+
+<time label="Time" metric="time" halign="LEFT">
+    <position x="LEFT+20" y="TOP+10" />
+    <colors>
+        <title>DEFAULT</title>
+        <value>DEFAULT</value>
+    </colors>
+    <fonts>
+      <title fontname="DEFAULT" size="DEFAULT-20" />
+      <value fontname="DEFAULT" size="DEFAULT+5" />
+    </fonts>
+</time>
+
+<label halign="LEFT" value="2016 (C) Juan M. Casillas &lt;juan.casillas@gmail.com&gt;">
+    <position x="LEFT+20" y="TOP+60" />
+    <colors>
+         <value>DEFAULT</value>
+    </colors>
+    <fonts>
+      <value fontname="DEFAULT" size="DEFAULT-16" />
+    </fonts>
+</label>
+
+<picture  halign="RIGHT">
+    <position x="RIGHT-20" y="BOTTOM-250" />
+    <img width="40" height="40" alpha="200" png="resources/white/temperature.png" />
+</picture>
+
+<temperature label="Temp (C)" metric="temperature" halign="RIGHT">
+    <position x="RIGHT-70" y="BOTTOM-260" />
+    <colors>
+        <title>DEFAULT</title>
+        <value>DEFAULT</value>
+    </colors>
+    <fonts>
+      <title fontname="DEFAULT" size="DEFAULT-20" />
+      <value fontname="DEFAULT" size="DEFAULT+5" />
+    </fonts>
+</temperature>
+
+<picture halign="RIGHT">
+    <position x="RIGHT-20" y="BOTTOM-190" />
+    <img width="40" height="40" alpha="200" png="resources/white/rpm.png" />
+</picture>
+
+<cadence label="RPM" metric="cadence" halign="RIGHT">
+    <position x="RIGHT-70" y="BOTTOM-200" />
+    <colors>
+        <title>DEFAULT</title>
+        <value>DEFAULT</value>
+    </colors>
+    <fonts>
+      <title fontname="DEFAULT" size="DEFAULT-20" />
+      <value fontname="DEFAULT" size="DEFAULT+5" />
+    </fonts>
+</cadence>
+
+<picture  halign="RIGHT">
+    <position x="RIGHT-20" y="BOTTOM-65" />
+    <img width="40" height="40" alpha="200" png="resources/white/power.png" />
+
+</picture>
+
+
+<power label="WATTS" metric="power" halign="RIGHT" animated="True">
+    <position x="RIGHT-70" y="BOTTOM-80" />
+    <colors>
+        <title>DEFAULT</title>
+        <value>DEFAULT</value>
+    </colors>
+    <fonts>
+      <title fontname="DEFAULT" size="DEFAULT-20" />
+      <value fontname="DEFAULT" size="DEFAULT+18" />
+    </fonts>
+</power>
+
+
+<gpsinfo label="GPS Info" metric="current_position" halign="RIGHT">
+    <position x="RIGHT-20" y="TOP+20" />
+    <colors>
+        <title>DEFAULT</title>
+        <value>DEFAULT</value>
+    </colors>
+    <fonts>
+      <title fontname="DEFAULT" size="DEFAULT-20" />
+      <value fontname="DEFAULT" size="DEFAULT-10" />
+    </fonts>
+</gpsinfo>
+
+<osmmap label="OSM MAP" metric="position_index" halign="RIGHT">
+    <position x="RIGHT-20" y="TOP+60" />
+    <map width="256" height="128" empty="False" alpha="128"/>
+
+    <colors>
+        <title>DEFAULT</title>
+        <value>DEFAULT</value>
+        <start>#00C800FF</start>
+        <end>#0000C8FF</end>
+        <point>#C80000FF</point>
+        <border>#00000000</border>
+        <bg>#90909028</bg>
+    </colors>
+    <fonts>
+      <title fontname="DEFAULT" size="DEFAULT-20" />
+      <value fontname="DEFAULT" size="DEFAULT+10" />
+    </fonts>
+</osmmap>
+
+<altgraph label="Altitude" metric="position_index, distance, elevation" halign="RIGHT">
+    <position x="RIGHT-20" y="TOP+200" />
+    <graph width="256" height="64" alpha="128" markradius="2" pointradius="3" xgap="10" ygap="15" />
+    <colors>
+        <bg>#0A640A80</bg>
+        <fg>#09320980</fg>
+        <line>#0FC80F80</line>
+        <start>#00FF00FF</start>
+        <markpoint>#FEFEFEFF</markpoint>
+
+        <end>#0000C8FF</end>
+        <point>#C80000FF</point>
+        <border>#000000C8</border>
+        <mark>#FFFFFFC8</mark>
+        <label>#FFFFFFC8</label>
+    </colors>
+    <fonts>
+      <mark fontname="DEFAULT" size="DEFAULT-26" />
+      <label fontname="DEFAULT" size="DEFAULT-24" />
+    </fonts>
+</altgraph>
+
+<bearing label="DEG" metric="bearing" halign="RIGHT">
+    <position x="RIGHT-20" y="TOP+60" />
+    <compass width="40" height="40" alpha="128" markradius="2" pointradius="3" ygap="15" png="resources/arrow_dark.png"/>
+    <colors>
+        <bg>#0A640A80</bg>
+        <fg>#00FFFF80</fg>
+        <border>#000000C8</border>
+        <mark>#FFFFFFC8</mark>
+    </colors>
+    <fonts>
+      <mark fontname="DEFAULT" size="DEFAULT-24" />
+    </fonts>
+</bearing>
+
+<!--
+<ecg label="BPM" metric="hr" halign="RIGHT">
+    <position x="RIGHT-20" y="TOP+280" />
+    <ecgmonitor width="256" height="32" alpha="128" markradius="2" pointradius="3" ygap="15" />
+    <colors>
+        <bg>#0A640A80</bg>
+        <fg>#00FFFF80</fg>
+        <border>#000000C8</border>
+        <mark>#FFFFFFC8</mark>
+    </colors>
+    <fonts>
+      <mark fontname="DEFAULT" size="DEFAULT-24" />
+    </fonts>
+</ecg>
+-->
+
+<picture label="" metric="" halign="CENTER">
+    <position x="CX" y="CY" />
+    <img width="512" height="512" alpha="20" png="resources/cplogo.png" />
+</picture>
+
+
+
+
+</layout>
+</configuration>

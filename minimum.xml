@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="ASCII" standalone="yes"?>
+<configuration>
+
+<preferences>
+<default_font>
+    <path>fonts/BebasNeue.otf</path>
+    <size>36</size>
+</default_font>
+</preferences>
+
+<layout>
+
+
+
+<slope label="SLOPE %" metric="slope" halign="LEFT">
+    <position x="LEFT+20" y="BOTTOM-200" />
+    <colors>
+        <title>#FFFFFFFF</title>
+        <value>#FFFFFFFF</value>
+    </colors>
+    <fonts>
+    <title fontname="DEFAULT" size="DEFAULT-20" />
+    <value fontname="DEFAULT" size="DEFAULT+5" />
+    </fonts>
+</slope>
+
+<distance label="DISTANCE (M)" metric="distance" halign="LEFT">
+    <position x="LEFT+20" y="BOTTOM-140" />
+    <colors>
+        <title>#FFFFFFFF</title>
+        <value>#FFFFFFFF</value>
+    </colors>
+    <fonts>
+    <title fontname="DEFAULT" size="DEFAULT-20" />
+    <value fontname="DEFAULT" size="DEFAULT+5" />
+    </fonts>
+</distance>
+
+<speed label="KM/H" metric="speed" halign="LEFT">
+    <position x="LEFT+20" y="BOTTOM-80" />
+    <colors>
+        <title>#FFFFFFFF</title>
+        <value>#FFFFFFFF</value>
+    </colors>
+    <fonts>
+    <title fontname="DEFAULT" size="DEFAULT-18" />
+    <value fontname="DEFAULT" size="DEFAULT+18" />
+    </fonts>
+</speed>
+
+
+<label label="" metric="" halign="LEFT" value="2016 (C) Juan M. Casillas &lt;juan.casillas@gmail.com&gt;">
+    <position x="LEFT+20" y="TOP+10" />
+    <colors>
+         <value>#FFFFFFFF</value>
+    </colors>
+    <fonts>
+      <value fontname="DEFAULT" size="DEFAULT-20" />
+    </fonts>
+</label>
+
+<cadence label="RPM" metric="cadence" halign="RIGHT">
+    <position x="RIGHT-20" y="BOTTOM-140" />
+    <colors>
+        <title>#FFFFFFFF</title>
+        <value>#FFFFFFFF</value>
+    </colors>
+    <fonts>
+      <title fontname="DEFAULT" size="DEFAULT-20" />
+      <value fontname="DEFAULT" size="DEFAULT+5" />
+    </fonts>
+</cadence>
+
+<hr label="BPM" metric="hr" halign="RIGHT" animated="False">
+    <position x="RIGHT-20" y="BOTTOM-80" />
+    <colors>
+        <title>#FFFFFFFF</title>
+        <value>#FFFFFFFF</value>
+    </colors>
+    <fonts>
+      <title fontname="DEFAULT" size="DEFAULT-20" />
+      <value fontname="DEFAULT" size="DEFAULT+18" />
+    </fonts>
+</hr>
+
+<osmmap label="OSM MAP" metric="current_position" halign="RIGHT">
+    <position x="RIGHT-20" y="TOP+20" />
+    <map width="256" height="128" empty="False" alpha="128"/>
+
+    <colors>
+        <title>#FFFFFFFF</title>
+        <value>#FFFFFFFF</value>
+        <start>#00C800FF</start>
+        <end>#0000C8FF</end>
+        <point>#C80000FF</point>
+        <border>#00000000</border>
+    </colors>
+    <fonts>
+      <title fontname="DEFAULT" size="DEFAULT-20" />
+      <value fontname="DEFAULT" size="DEFAULT+10" />
+    </fonts>
+</osmmap>
+
+<altgraph label="Altitude" metric="position_index" halign="RIGHT">
+    <position x="RIGHT-20" y="TOP+150" />
+    <graph width="256" height="64" alpha="128" markradius="2" pointradius="3" xgap="10" ygap="15" />
+    <colors>
+        <bg>#0A640A80</bg>
+        <fg>#00FFFF80</fg>
+        <start>#00FF00FF</start>
+        <end>#0000C8FF</end>
+        <point>#C80000FF</point>
+        <border>#000000C8</border>
+        <mark>#FFFFFFC8</mark>
+    </colors>
+    <fonts>
+      <mark fontname="DEFAULT" size="DEFAULT-24" />
+    </fonts>
+</altgraph>
+
+
+<picture label="" metric="" halign="LEFT">
+    <position x="TOP+30" y="LEFT+30" />
+    <img width="256" height="256" alpha="20" png="res/cplogo.png" />
+    <colors>
+    </colors>
+    <fonts>
+    </fonts>
+</picture>
+
+
+</layout>
+</configuration>
