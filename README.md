@@ -100,17 +100,18 @@ Have more things, but I can't remember every feature of the project :)
    
 ## RUNNING PLATFORMS & STATUS
     
-* Currently works on Windows 7 and MacOS 10.8.5 (my computers).
+* Currently works on Windows 7, Windows 10 and MacOS 10.13.6.
     
-* Based on Python 2.7 with the following dependencies:
+* Based on Python 3.11 with the following dependencies:
     - OpenCV
     - PIL (PILLOW)
     - PyGame
     - FITParse
-    - GPXPy
+    - GPXPy (used my own modified version)
     - NumPy
-    (among others).
-    
+    - Hachoir
+    - Imutils
+    - TimeCode
 
 This project is multi-platform, and should work on Linux without 
 problems. Currently the distribution status of this work is 
@@ -120,12 +121,11 @@ to install it you haven't any package or installer (by now).
 
 ## LICENSING (TODO)
 
-All the code is based on OpenSource code, and the owners of the modules used have the rights over it. My project is not licensed (by now) because I have no plans to release it (yet). This can be negotiated based on needs.
+The code uses the GNU General Public license version 3.0 for personal and Non Profit organizations. For Commercial use, please contact me before using the code.
 
 ## WARRANTY
 
-No warranty is given for this project. Is a personal development, and
-It's not distributed neither released.
+No warranty is given for this project. Is a personal development, and It's not distributed neither released.
 
 ## INSTALL
 
@@ -140,9 +140,8 @@ It's not distributed neither released.
 
 % python311\python.exe -m pip install imutils
 % python311\python.exe -m pip install timecode
-% python311\python.exe -m pip install hachoir-core
-% python311\python.exe -m pip install hachoir-parser
-% python311\python.exe -m pip install hachoir-metadata
+% python311\python.exe -m pip install hachoir
+
 
 
 FFMPEG binaries (https://www.gyan.dev/ffmpeg/builds/)
