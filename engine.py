@@ -39,7 +39,7 @@ class Engine:
 
             # create colors (convert from string to colors)
             for f in self.config.elements[i].config.colors.keys():
-                print(self.config.elements[i].config.colors[f].colorname)
+
                 self.config.elements[i].config.colors[f].color = pygame.Color(self.config.elements[i].config.colors[f].colorname.decode())
                 self.config.elements[i].config.colors[f].colortuple = (self.config.elements[i].config.colors[f].color.r,
                                                                     self.config.elements[i].config.colors[f].color.g,
@@ -54,15 +54,17 @@ class Engine:
         "map the metric element with the item"
 
         for item in self.config.elements:
-
+         
             # to allow static values work
             value = item.value
             value_list = ()
+     
+            
             if metrics and item.config.metric:
                 for lmetric in item.config.metric:
                     if  lmetric in metrics.keys():
                         value_list += (metrics[lmetric],)
-                        
+
                         # call the function, if available
                         if item.config.function != None:
                             r = item.config.function
@@ -70,12 +72,15 @@ class Engine:
                                 r = r.replace(j.upper(), str(metrics[j]))
 
                             value_list += (eval(r),)
-            
+
+            ##print("UpdateE()", item.name, value, len(value_list), value_list)
             if len(value_list) > 0:
                 item.update(value_list, metrics.time)
             else:
                 # preserve static values
                 item.update( (value,), metrics.time)
+
+          
 
     def Draw(self, sf):
         for item in self.config.elements:
@@ -90,4 +95,8 @@ class Engine:
         return a
 
 
-
+    def Print(self):
+        for item in self.config.elements:
+            print("name: %s, value: %s, time: %s" % (item.name, item.value, item.current_time))
+            #for key in item.__dict__.keys():
+            #    print("%s: %s" % (key, item.__dict__[key]))

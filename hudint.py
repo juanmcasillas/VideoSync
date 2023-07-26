@@ -130,6 +130,7 @@ if __name__ == "__main__":
     frames = stream.get(cv2.CAP_PROP_FRAME_COUNT )
     fps = stream.get(cv2.CAP_PROP_FPS )
 
+
     print("Video Information ------------------------------------------------- ")
     print(("File:\t%s" % args.video_file))
     #print("MSEC: %d" % stream.get(cv2.CAP_PROP_POS_MSEC ))
@@ -166,25 +167,24 @@ if __name__ == "__main__":
         print(("Error, can't guess type for %s. Can't parse it. Ensure is FIT or GPX file." % args.gpx_file))
         sys.exit(1)
 
+    
     data_series = CreateSeries(gpx_points)
     data_series = Smooth(data_series, [ "slope", "speed" ] )
     
-    gpx_item = GPXItem(gpx_points)
-    gpxtxt = gpx_item.CreateGPX11(gpx_points)
-    f = open("salida.gpx", "w+")
-    f.write(gpxtxt)
-    f.close()
-    #sys.exit(0)
-                         
     
-    #     print data_series[0].header()
-    #     for i in data_series:
-    #         print i
-    #     sys.exit(0)
-    
-    # init things
-    
+    if False:
+        gpx_item = GPXItem(gpx_points)
+        gpxtxt = gpx_item.CreateGPX11(gpx_points)
+        f = open("salida.gpx", "w+")
+        f.write(gpxtxt)
+        f.close()
 
+        print(data_series[0].header())
+        for i in data_series:
+            print(i)
+        sys.exit(0)
+        
+    # init things
 
     engine = Engine((width, height), fps)
     pygame.init()
@@ -294,11 +294,7 @@ if __name__ == "__main__":
         if args.video_file and not grabbed:
             break
 
-
-
         # get the frame delta interval
-        
-        
 
         delta = stream.get(cv2.CAP_PROP_POS_MSEC)           # from the start
         tdelta = datetime.timedelta(milliseconds=delta)
@@ -306,11 +302,12 @@ if __name__ == "__main__":
         
         frame_time = (frame_counter % fps) * 1.0/fps  #between 0.x and 0 (when frame change happens)
         
+        # print("Current Time:%s , UTC: %s" % (current_time, gpxtoolbox.utc_to_local(gpx_point.time) ))
         if current_time > gpxtoolbox.utc_to_local(gpx_point.time):
             #
             # move point. If last one, stick to it if it is the same, skip it ahead
             #
-            
+ 
             if gpx_index + 1 < len(gpx_points):
                 
                 gpx_index += 1
@@ -320,8 +317,9 @@ if __name__ == "__main__":
                 distance += Distance(gpx_point_prev, gpx_point)
 
         # update graphics engine with data.
-        engine.Update(metrics)
-
+        # engine.Update(metrics)
+        # sys.exit(0)
+        
         if engine.config.interpolate:
             metrics.slope = Interpolate( gpx_point_prev.time , data_series[gpx_index-1].slope, gpx_point.time , data_series[gpx_index].slope,  frame_time )
             metrics.elevation = Interpolate( gpx_point_prev.time , gpx_point_prev.elevation, gpx_point.time , gpx_point.elevation,  frame_time ) 
@@ -332,6 +330,7 @@ if __name__ == "__main__":
             metrics.speed = Interpolate( gpx_point_prev.time , data_series[gpx_index-1].speed, gpx_point.time , data_series[gpx_index].speed,  frame_time )
             metrics.bearing = Interpolate( gpx_point_prev.time , data_series[gpx_index-1].bearing, gpx_point.time , data_series[gpx_index].bearing,  frame_time )
         else:
+
             metrics.slope = data_series[gpx_index].slope
             metrics.elevation = gpx_point.elevation
             metrics.distance = distance
@@ -348,16 +347,25 @@ if __name__ == "__main__":
         if "extensions" in list(gpx_point.__dict__.keys()) and gpx_point.extensions:
 
             for ext_item in [ "cadence", "temperature", "hr", "power"]:
-                if ext_item in list(gpx_point.extensions.keys()):
 
+                if ext_item in list(gpx_point.extensions.keys()):
+                    
                     if engine.config.interpolate:
                         metrics.__dict__[ext_item] = Interpolate( gpx_point_prev.time , gpx_point_prev.extensions[ext_item],
                                                                   gpx_point.time , gpx_point.extensions[ext_item],
                                                                   frame_time )
                     else:
                         metrics.__dict__[ext_item] = gpx_point.extensions[ext_item]
+               
 
-   
+
+        # update graphics engine with data.
+        # test, doesn't change metrics.__dict__['power'] = frame_counter
+        # print("-" * 80)
+        engine.Update(metrics)
+        ##engine.Print()
+
+        #           
         #
         # annotate with PYGAME the required information.
         # set here the graphics, etc.
@@ -368,28 +376,32 @@ if __name__ == "__main__":
             sf = cvimage_to_pygame(frame)
 
 
-        print(metrics)
-        # prepare overlay to be written
-        engine.Draw(sf)
+        # print("=" * 80)
+        # print(metrics)
+        # print("=" * 80)
 
-        # move to window
-        frame = pygame_to_cvimage(sf)
+        if True:
+            # prepare overlay to be written
+            engine.Draw(sf)
 
-        # write the data output
-        ostream.write(frame)
+            # move to window
+            frame = pygame_to_cvimage(sf)
 
-        # show the frame to our screen and increment the frame counter
+            # write the data output
+            ostream.write(frame)
 
-        if args.show:
-            cv2.imshow("Frame", frame)
-        key = cv2.waitKey(50) & 0xFF
+            # show the frame to our screen and increment the frame counter
 
-        # if the 'q' key is pressed, stop the loop
-        if key == ord("q"):
-            break
-        
-        if frame_counter % fps == 0 and frame_counter >0:
-            print(("%s %08d %3.2f %3.2f %3.2f %3.2f" % (current_time, frame_counter, metrics.distance, metrics.elevation, metrics.speed, metrics.slope)))
+            if args.show:
+                cv2.imshow("Frame", frame)
+            key = cv2.waitKey(50) & 0xFF
+
+            # if the 'q' key is pressed, stop the loop
+            if key == ord("q"):
+                break
+            
+            if frame_counter % fps == 0 and frame_counter >0:
+                print(("FPS: %s %08d %3.2f %3.2f %3.2f %3.2f" % (current_time, frame_counter, metrics.distance, metrics.elevation, metrics.speed, metrics.slope)))
 
         frame_counter += 1
         ### end while

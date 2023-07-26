@@ -1074,9 +1074,9 @@ class HRMManager():
 
         end_time = start_time + timedelta(seconds=deltat)
 
-        print("CalculateTimeRange: START: %s - END: %s (%s)" % (start_time, end_time, timedelta(seconds=deltat)))
+        
         # now, iterate from instamp to deltat.
-
+ 
         NoneInserted = True
         for i in range(len(points)):
             p = points[i]
@@ -1108,6 +1108,8 @@ class HRMManager():
 
         # debug things
 
+        print("CalculatedTimeRange: START: %s - END: %s (%s) #Points: %d" % \
+              (start_time, end_time, timedelta(seconds=deltat),len(r)))
         return r
 
 

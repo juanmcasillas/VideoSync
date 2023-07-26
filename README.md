@@ -18,6 +18,10 @@ recorded previously with a GPS unit, sincronized with the video.
 6. Download GPS unit files.
 7. Run the program with the configuration file, gps file and video files.
 
+```
+
+```
+
 ## DETAILED INFO
 
 The project uses the stored date & time metadata field in the video clip to sync the GPS info with the video frames. After getting this value, the 

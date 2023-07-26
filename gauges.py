@@ -86,7 +86,7 @@ class BaseGauge:
     cfg.id = id
     cfg.label = label
     if metric:
-        cfg.metric = map(lambda x: x.strip(), metric.split(","))
+        cfg.metric = list(map(lambda x: x.strip(), metric.split(",")))
     else:
         cfg.metric = None
         
@@ -163,7 +163,8 @@ class BaseGauge:
     #if value > self.max: self.max = value
     #if value < self.min: self.min = value
     # check the order of values, reflected on "metric="""
-    
+
+    ##print("update()", values, type(values))
     if len(values) == 0:
         self.value = None
     else:
@@ -779,11 +780,14 @@ class OSMMapGauge(OneValueGauge):
 
 
     def update(self, values, current_time=None):
+        # map problem here
         self.gpx_point_index = values[0]
-        if self.gpx_point_index in (0, len(self.gpx_points)):
-            self.gpx_point = self.gpx_points[self.gpx_point_index]
-        else:
-            print("Warning, point out of bounds. FIT/GPX file matches Video?")
+        #if self.gpx_point_index in (0, len(self.gpx_points)):
+        #if self.gpx_point_index:
+        self.gpx_point = self.gpx_points[self.gpx_point_index]
+        #else:
+        #    print(self.gpx_point_index)
+        #    print("Warning, point out of bounds. FIT/GPX file matches Video?")
         self.current_time = current_time
 
     def set_points(self, points):
@@ -988,8 +992,8 @@ class AltGraphGauge(OneValueGauge):
     def update(self, values, current_time=None):
         # check metric="" field in xml configuration (multi metric)
         self.point_index = values[0]
-        self.distance = values[1] if len(values) > 2 else 0
-        self.elevation = values[2] if len(values) > 3 else 0 
+        self.distance = values[1]
+        self.elevation = values[2]
         self.current_time = current_time
 
         if not self.elevation:  self.elevation = 0
