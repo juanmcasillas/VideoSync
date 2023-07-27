@@ -7,6 +7,22 @@ recorded previously with a GPS unit, sincronized with the video.
 * [Video 2](https://www.youtube.com/watch?v=SGQ2KWcBtwY)
 * [Video 3](https://www.youtube.com/watch?v=Fg8Sf4fPCwY&t=70s)
 
+## NOTE
+
+This software has been implemented on 2016, and now is under heavy redesign / refactoring.
+I', using `vulture` and `coverage` to remove dead code and help me to refactor the old 2.7
+python code to 3.11.
+
+* `vulture`: `vulture.exe hudint.py -t "TEST" -s -v .\templates\config_white.xml .\samples\Tietar-MTB\data.fit .\samples\Tietar-MTB\video1.MP4 .\samples\Tietar-MTB\ouput.avi`
+* `coverage`: `coverage.exe run hudint.py -t "TEST" -s -v .\templates\config_white.xml .\samples\Tietar-MTB\data.fit .\samples\Tietar-MTB\video1.MP4 .\samples\Tietar-MTB\ouput.avi`
+
+### H264 Encoder:
+
+Solution found [here](https://stackoverflow.com/questions/41972503/could-not-open-codec-libopenh264-unspecified-error)
+go [here](https://github.com/cisco/openh264/releases) and download the required version (in our case, 1.8.0) then
+save the `DLL` file in the same directory that the python script (e.g. `VideoSync` folder). Then, change the writer
+to the fourCC codec info, from `XVID` to `X264`. Done.
+
 
 ## USAGE
 

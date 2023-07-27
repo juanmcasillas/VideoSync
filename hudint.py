@@ -1,3 +1,17 @@
+#!/usr/bin/env python3.9
+# -*- coding: utf-8 -*-
+# ############################################################################
+#
+# hudint.py
+# 27/07/2023 (c) Juan M. Casillas <juanm.casillas@gmail.com>
+#
+# Python Overlay 2.0 (VideoSync) main program. This program creates a HUD
+# overlay based on the telemetry of FIT or GPX files. See 
+# https://github.com/juanmcasillas/VideoSync for more info about it Project
+# started on 07/07/2016 !s
+#
+# ############################################################################
+
 ##
 ## don't forget to save the .dll into site-packages,
 ## and add site-packages to the PATH
@@ -34,20 +48,6 @@
 ## export DYLD_FALLBACK_LIBRARY_PATH=/usr/local/lib:$DYLD_FALLBACK_LIBRARY_PATH
 ## export PYTHONPATH=/usr/lib/python2.7/site-packages:$PYTHONPATH
 
-## pip install imutils
-## pip install timecode
-## pip install hachoir-core
-## pip install hachoir-parser
-## pip install hachoir-metadata
-## pygame!
-
-
-## PIP reqs
-## need timecode
-## need opencv
-## need hachoir-core
-## need hachoir-parser
-## need hachoir-metadata
 
 ## 07/July/2016    BASIC Skel running. Features
 ##    - create merged video with audio                    * done 08/07/16
@@ -92,25 +92,74 @@ import pygame
 from engine import Engine
 from baseconfig import BaseConfig
 
+class ClipInfo:
+    def __init__(self, video_file, stream, offset=0, duration=0):
+        self.video_file    = video_file
+        metadata           = metaDataFile(self.video_file)
+        self.duration_m    = metadata.get('duration')
+        self.creation_date = metadata.get('creation_date')
+        self.width         = int(stream.get(cv2.CAP_PROP_FRAME_WIDTH ))
+        self.height        = int(stream.get(cv2.CAP_PROP_FRAME_HEIGHT ))
+        self.frames        = stream.get(cv2.CAP_PROP_FRAME_COUNT )
+        self.fps           = stream.get(cv2.CAP_PROP_FPS )
+        self.msec          = stream.get(cv2.CAP_PROP_POS_MSEC )
+        self.length        = self.frames / self.fps
+        self.offset        = int(offset)
+        self.duration      = int(duration)
+
+        self.gpx_info    = None
+
+    def show_video_info(self):
+        print("Video Information -[B]--------------------------------------------- ")
+        print("File:    \t%s"   % self.video_file)
+        print("MSEC:    \t%d"   % self.msec)
+        print("WIDTH:   \t%d"   % self.width)
+        print("HEIGHT:  \t%d"   % self.height)
+        print("FPS:     \t%f"   % self.fps)
+        print("FRAMES:  \t%d"   % self.frames)
+        print("LENGTH:  \t%f s" % self.length)
+        print("Duration:\t%s"   % self.duration_m)
+        print("CDate:   \t%s"   % self.creation_date)
+        print("Offset:  \t%s s" % self.offset)
+        print("Duration:\t%s s" % self.duration)
+        print("Video Information -[E]--------------------------------------------- ")
+
+    def show_gpx_info(self):
+
+        print("GPX Information -[B]----------------------------------------------- ")
+        print("File:           \t%s"   % self.gpx_info.gpx_file)
+        print("Mode:           \t%s"   % self.gpx_info.gpx_mode)
+        print("start range:    \t%s"   % self.gpx_info.start_time)
+        print("end range:      \t%s"   % self.gpx_info.end_time)
+        print("len range:      \t%d"   % self.gpx_info.points_len)
+        print("len (all):      \t%d"   % self.gpx_info.points_all)
+        print("start (all):    \t%s"   % self.gpx_info.start_time_all)
+        print("end (all):      \t%s"   % self.gpx_info.end_time_all)
+        print("duration (all): \t%s"   % (self.gpx_info.end_time_all - self.gpx_info.start_time_all))
+        print("GPX Information -[E]----------------------------------------------- ")
+
+
+    
 
 
 
 
-
-## ############################################################################
-##
-## MAIN
-##
-## ############################################################################
+# ############################################################################
+#
+# MAIN
+#
+# ############################################################################
 
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument("-o", "--offset", help="Offset in seconds from Video Start", action="store", default=0)
+    parser.add_argument("-d", "--duration", help="Duration in seconds from Video Start or offset", action="store", default=0)
     parser.add_argument("-v", "--verbose", help="Show data about file and processing", action="count")
     parser.add_argument("-f", "--fake", help="Use GPX start date insted the vioeo one (for debug)", action="store_true")
     parser.add_argument("-l", "--layer", help="Create a layer to use in Final Cut (Overlay)", action="store_true")
     parser.add_argument("-s", "--show", help="Show frames during encoding", action="store_true")
+    parser.add_argument("-i", "--only-info", help="Show info then exit", action="store_true", default=False)
     parser.add_argument("-t", "--title", help="Title to write")
     parser.add_argument("config_file", help="XML configuration file")
     parser.add_argument("gpx_file", help="GPX 1.1 file [fit|gpx]")
@@ -119,59 +168,48 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     hrmmanager = HRMManager(verbose=args.verbose)
-    metadata = metaDataFile(args.video_file)
-
     stream = cv2.VideoCapture(args.video_file)
+    clip_info = ClipInfo(args.video_file, stream, offset=args.offset, duration=args.duration)
 
-    duration_m = metadata.get('duration')
-    creation_date = metadata.get('creation_date')
-    width =  int(stream.get(cv2.CAP_PROP_FRAME_WIDTH ))
-    height = int(stream.get(cv2.CAP_PROP_FRAME_HEIGHT ))
-    frames = stream.get(cv2.CAP_PROP_FRAME_COUNT )
-    fps = stream.get(cv2.CAP_PROP_FPS )
-
-
-    print("Video Information ------------------------------------------------- ")
-    print(("File:\t%s" % args.video_file))
-    #print("MSEC: %d" % stream.get(cv2.CAP_PROP_POS_MSEC ))
-    print(("WIDTH:\t%d" % stream.get(cv2.CAP_PROP_FRAME_WIDTH)))
-    print(("HEIGHT:\t%d" % stream.get(cv2.CAP_PROP_FRAME_HEIGHT)))
-    print(("FPS:\t%f" % stream.get(cv2.CAP_PROP_FPS )))
-    print(("FRAMES:\t%d" % stream.get(cv2.CAP_PROP_FRAME_COUNT )))
-    print(("LENGTH:\t%f" % ( frames / fps )))
-    print(("Length:\t%s" % duration_m))
-    print(("CDate:\t%s"  % creation_date))
-    print(("Offset:\t%s" % args.offset))
-    print("Video Information ------------------------------------------------- ")
+    clip_info.show_video_info()
 
     # Video Loaded. Now, I have to load the GPX file and get the points in
     # the interval marked for video. Do some trick to match the current
     # video to the GPX (I have no real data).
-
     # autodectect file, and get the parser acording to extension
 
     fname,fext = os.path.splitext(args.gpx_file)
-
     gpx_points = None
-    if fext.lower() == ".fit":
-        #
-        # get points with FIT Parser
-        print("Using Garmin FIT file format")
-        gpx_points = hrmmanager.GetTimeRangeFIT(args.gpx_file, creation_date + timedelta(seconds=int(args.offset)), duration_m.total_seconds()-int(args.offset), fake_time=args.fake)
+    
+    mode = fext.lower().replace('.','')
+    crop_start = clip_info.creation_date + timedelta(seconds=clip_info.offset)
+    if clip_info.duration > 0:
+        crop_duration = clip_info.duration
+        if crop_duration > clip_info.duration_m.total_seconds()-clip_info.offset:
+            crop_duration = clip_info.duration_m.total_seconds()-clip_info.offset
+    else: 
+        crop_duration = clip_info.duration_m.total_seconds()-clip_info.offset
+    
 
-    if fext.lower() == ".gpx":
-        print ("Using Garmin GPX file format")
-        gpx_points = hrmmanager.GetTimeRangeGPX(args.gpx_file, creation_date + timedelta(seconds=int(args.offset)), duration_m.total_seconds()-int(args.offset), fake_time=args.fake)
+    gpx_points,gpx_info = hrmmanager.GetTimeRange(mode,
+                                                  args.gpx_file, 
+                                                  crop_start, 
+                                                  crop_duration, 
+                                                  fake_time=args.fake)
+    clip_info.gpx_info = gpx_info
+    clip_info.show_gpx_info()
+
+    if args.only_info:
+        exit(0)
 
     if not gpx_points:
         print(("Error, can't guess type for %s. Can't parse it. Ensure is FIT or GPX file." % args.gpx_file))
         sys.exit(1)
 
-    
     data_series = CreateSeries(gpx_points)
     data_series = Smooth(data_series, [ "slope", "speed" ] )
     
-    
+    # save dump for testing
     if False:
         gpx_item = GPXItem(gpx_points)
         gpxtxt = gpx_item.CreateGPX11(gpx_points)
@@ -186,12 +224,12 @@ if __name__ == "__main__":
         
     # init things
 
-    engine = Engine((width, height), fps)
+    engine = Engine((clip_info.width, clip_info.height), clip_info.fps)
     pygame.init()
     pygame.font.init()
     #screen=pygame.display.set_mode([width,height]) #small screen
     #screen=pygame.display.set_mode([320,200]) #small screen
-    screen = pygame.display.set_mode([width,height],pygame.SRCALPHA,32)
+    screen = pygame.display.set_mode([clip_info.width,clip_info.height],pygame.SRCALPHA,32)
 
     #engine.CreateFonts()
     #engine.CreateGauges() ## some customization for KM/H, units, etc.
@@ -208,8 +246,8 @@ if __name__ == "__main__":
     # AUDIO IS DISCARDED SO LETS WORK WITH FFMPEG TO ADD THE AUDIO LAYER IF NEEDED
 
 
-    fourcc = cv2.VideoWriter_fourcc(*'XVID') # DIVX, XVID, MJPG, X264, WMV1, WMV2
-    ostream = cv2.VideoWriter(args.output_file,fourcc, fps, (width,height))
+    fourcc = cv2.VideoWriter_fourcc(*'X264') # DIVX, XVID, MJPG, X264, WMV1, WMV2, AVC1 (works: XVID)
+    ostream = cv2.VideoWriter(args.output_file,fourcc, clip_info.fps, (clip_info.width,clip_info.height))
 
     #
     # POINT INFO:
@@ -224,7 +262,7 @@ if __name__ == "__main__":
 
     # Metadata DATETIME in LOCALTIME format.
 
-    start_time = creation_date + timedelta(seconds=int(args.offset))
+    start_time = clip_info.creation_date + timedelta(seconds=clip_info.offset)
 
     # note that VIDEO_START = GPXPOINT_START
     # watch out FAKE TIME INFO.
@@ -240,7 +278,7 @@ if __name__ == "__main__":
 
     if args.layer:
         # match the openCV frame format
-        background_surface_np = np.zeros( (height, width, 3), np.uint8 )
+        background_surface_np = np.zeros( (clip_info.height, clip_info.width, 3), np.uint8 )
 
 
     # begin calculate things #################################################
@@ -294,14 +332,23 @@ if __name__ == "__main__":
         if args.video_file and not grabbed:
             break
 
+
         # get the frame delta interval
 
         delta = stream.get(cv2.CAP_PROP_POS_MSEC)           # from the start
         tdelta = datetime.timedelta(milliseconds=delta)
         current_time = start_time + tdelta
         
-        frame_time = (frame_counter % fps) * 1.0/fps  #between 0.x and 0 (when frame change happens)
+        frame_time = (frame_counter % clip_info.fps) * 1.0/clip_info.fps  #between 0.x and 0 (when frame change happens)
         
+        if current_time < crop_start:
+            print("CROPPING: Skipping frame")
+            continue
+
+        if current_time > crop_start + datetime.timedelta(seconds=crop_duration):
+            print("CROPPING: duration reached, exit")
+            break
+
         # print("Current Time:%s , UTC: %s" % (current_time, gpxtoolbox.utc_to_local(gpx_point.time) ))
         if current_time > gpxtoolbox.utc_to_local(gpx_point.time):
             #
@@ -358,12 +405,13 @@ if __name__ == "__main__":
                         metrics.__dict__[ext_item] = gpx_point.extensions[ext_item]
                
 
-
         # update graphics engine with data.
         # test, doesn't change metrics.__dict__['power'] = frame_counter
         # print("-" * 80)
         engine.Update(metrics)
         ##engine.Print()
+
+
 
         #           
         #
@@ -380,40 +428,45 @@ if __name__ == "__main__":
         # print(metrics)
         # print("=" * 80)
 
-        if True:
-            # prepare overlay to be written
-            engine.Draw(sf)
+        # prepare overlay to be written
+        engine.Draw(sf)
 
-            # move to window
-            frame = pygame_to_cvimage(sf)
+        # move to window
+        frame = pygame_to_cvimage(sf)
 
-            # write the data output
-            ostream.write(frame)
+        # write the data output
+        ostream.write(frame)
 
-            # show the frame to our screen and increment the frame counter
+        # show the frame to our screen and increment the frame counter
 
-            if args.show:
-                cv2.imshow("Frame", frame)
-            key = cv2.waitKey(50) & 0xFF
+        if args.show:
+            cv2.imshow("Frame", frame)
+        #key = cv2.waitKey(1) & 0xFF
+        key = cv2.pollKey()
 
-            # if the 'q' key is pressed, stop the loop
-            if key == ord("q"):
-                break
-            
-            if frame_counter % fps == 0 and frame_counter >0:
-                print(("FPS: %s %08d %3.2f %3.2f %3.2f %3.2f" % (current_time, frame_counter, metrics.distance, metrics.elevation, metrics.speed, metrics.slope)))
+        # if the 'q' key is pressed, stop the loop
+        if key == ord("q"):
+            break
+        
+
+
+        if frame_counter % clip_info.fps == 0 and frame_counter >0:
+            print(("FPS: %s frames: %08d/%d distance: %05.2f elevation: %05.2f speed: %05.2f slope: %05.2f" % (
+                current_time, frame_counter, clip_info.frames, 
+                metrics.distance, metrics.elevation, metrics.speed, metrics.slope)))
 
         frame_counter += 1
         ### end while
 
     # cleanup the camera and close any open windows
+
     ostream.release()
     stream.release()
     cv2.destroyAllWindows()
     pygame.quit()
-
+    
     # create and restore the file
     encoder = FFMPEGAdapter()
-    encoder.CopyAudioStream(args.video_file, args.output_file)
+    encoder.ClipAudioStream(args.video_file, args.output_file, clip_info.offset, clip_info.duration)
 
 

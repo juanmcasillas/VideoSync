@@ -59,12 +59,10 @@ import os.path
 import random
 import time
 import datetime as dt
-from datetime import datetime
+from datetime import datetime, timezone
 import calendar
 import math
 import xml.dom.minidom as xmlp
-
-
 from gpxtoolbox import *
 
 # use Python3 Version
@@ -1108,9 +1106,11 @@ class HRMManager():
 
         # debug things
 
-        print("CalculatedTimeRange: START: %s - END: %s (%s) #Points: %d" % \
-              (start_time, end_time, timedelta(seconds=deltat),len(r)))
-        return r
+  
+        #print("CalculatedTimeRange: START: %s - END: %s (%s) #Points: %d" % \
+        #      (start_time, end_time, timedelta(seconds=deltat),len(r)))
+
+        return r,start_time,end_time
 
 
         #         print "Get: %d points (%d secs)" % (len(r), deltat)
@@ -1134,47 +1134,7 @@ class HRMManager():
         #         return r
 
 
-    #########################################################################
-    #
-    # GetTimeRange (Create a segment for a given time range, and return it
-    # VIDEO HUD project
-    #
-    #########################################################################
-
-
-    def GetTimeRangeGPX(self, gpx_file, instamp, deltat, fake_time=False):
-        """
-        gpx_file: the name of the file to be loaded (GPX 1.1)
-        instamp: stamp time when the segments start
-        deltat: stamp + seconds to end
-        """
-
-        if self.verbose >= 1:
-            print(self.LOG("START '%s' '%s' '%s'" % (gpx_file, instamp, deltat)))
-
-        #1 read the GPX Files and show some data about them
-
-        try:
-            gpxmanager = GPXToolBox()
-            gpxmanager.LoadFiles(gpx11=gpx_file)
-        except Exception as e:
-            raise Exception("Error while parsing %s: %s" % (gpx_file, e))
-
-        if self.verbose >= 1:
-                debug_time = time.time()
-                print(self.LOG("Loaded GPX File '%s' (%d points)" % (gpx_file, gpxmanager.get_gpx11_points_no())))
-
-        gpx = gpxmanager.gpx11
-        points = gpx.Segment().points
-
-        r = self.CalculateTimeRange(points, instamp, deltat, fake_time)
-
-        if self.verbose >= 1:
-            print(self.LOG("END '%s' '%s' '%s'" % (gpx_file, instamp, deltat)))
-
-        return r
-
-
+    
     #########################################################################
     #
     # GetTimeRange (Create a segment for a given time range, and return it
@@ -1183,27 +1143,59 @@ class HRMManager():
     #
     #########################################################################
 
-
-    def GetTimeRangeFIT(self, fit_file, instamp, deltat, fake_time=False):
+    def GetTimeRange(self, mode, data_file, instamp, deltat, fake_time=False):
         """
-        fit_file: the name of the file to be loaded (Garmin FIT)
+        data_file: the name of the file to be loaded (Garmin FIT)
         instamp: stamp time when the segments start
         deltat: stamp + seconds to end
         """
 
+
+
         if self.verbose >= 1:
-            print(self.LOG("START '%s' '%s' '%s'" % (fit_file, instamp, deltat)))
+            print(self.LOG("START %s '%s' '%s' '%s'" % (mode, data_file, instamp, deltat)))
 
         #1 read the GPX Files and show some data about them
 
+        if mode == 'fit':
+            points = self.FIT2TCX(data_file, None, saveFile=False)
+        elif mode == 'gpx':
+            try:
+                gpxmanager = GPXToolBox()
+                gpxmanager.LoadFiles(gpx11=data_file)
+            except Exception as e:
+                raise Exception("Error while parsing %s: %s" % (data_file, e))
+            gpx = gpxmanager.gpx11
+            points = gpx.Segment().points
 
-        points = self.FIT2TCX(fit_file, None, saveFile=False)
-        r= self.CalculateTimeRange(points, instamp, deltat, fake_time)
+        else:
+             raise Exception("Unknown mode: %s", mode)
+
+        r,start_time,end_time = self.CalculateTimeRange(points, instamp, deltat, fake_time)
 
         if self.verbose >= 1:
-            print(self.LOG("END '%s' '%s' '%s'" % (fit_file, instamp, deltat)))
+            print(self.LOG("END %s '%s' '%s' '%s'" % (mode, data_file, instamp, deltat)))
 
-        return r
+        info = EmptyClass()
+        info.start_time = start_time
+        info.end_time = end_time
+        info.points_len = len(r)
+        info.points_all = len(points)
+        info.gpx_file = data_file
+        info.gpx_mode = mode
+        
+        t_f = lambda x: x
+
+        if mode == "fit":
+            # time is in UTC, so change it.
+            t_f = lambda x: utc_to_local(x)
+
+        info.start_time_all = t_f(points[0].time)
+        info.end_time_all = t_f(points[-1].time)
+        return r,info
+
+
+    
 
     #########################################################################
     #
@@ -1219,7 +1211,7 @@ class HRMManager():
         #1 read the GPX Files and show some data about them
 
         try:
-            gpxmanager = GPXToolBox()
+            
             gpxmanager.LoadFiles(gpx11=gpx_file)
         except Exception as e:
             raise Exception("Error while parsing %s: %s" % (gpx_file, e))
@@ -1757,12 +1749,14 @@ class HRMManager():
 
             if state==0 and message.name == "event" and message.get("event_type").value == "start":
                 state = 1
-                print(self.LOG("* event start found at pos #%d" % (n)))
+                if self.verbose >= 1:
+                    print(self.LOG("* event start found at pos #%d" % (n)))
                 continue
 
             if state==1 and message.name == "event" and message.get("event_type").value == "stop_disable_all":
                 state = 2
-                print(self.LOG("* event stop_disable_all found at pos #%d" % (n)))
+                if self.verbose >= 1:
+                    print(self.LOG("* event stop_disable_all found at pos #%d" % (n)))
                 continue
 
             if state==2 and message.name == "session":
@@ -1789,8 +1783,14 @@ class HRMManager():
                 left_pedal_smoothness = self.FIT_getvalue(message, "left_pedal_smoothness", 0.0)
                 left_torque_effectiveness = self.FIT_getvalue(message, "left_torque_effectiveness", 0.0)
                 timestamp = message.get('timestamp').value
+                
+                #def utc_to_local(utc_dt):
+                #    return utc_dt.replace(tzinfo=timezone.utc).astimezone(tz=None)
+                # convert to localtime fit files
+                #timestamp = timestamp.replace(tzinfo=timezone.utc).astimezone(tz=None)
 
-                p =   GPXTrackPoint(latitude, longitude, altitude, timestamp, extensions={})
+                
+                p = GPXTrackPoint(latitude, longitude, altitude, timestamp, extensions={})
                 p.extensions['hr'] = heart_rate
                 p.extensions['cad'] = cadence
                 p.extensions['cadence'] = cadence

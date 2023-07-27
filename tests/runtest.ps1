@@ -4,8 +4,8 @@ $PYTHON="C:\\software\\python311\\python.exe"
 cd ..
 
 #$CURDIR="Cenicientos-ROAD"
-$CURDIR="Chase-M501-ROAD"
-#$CURDIR="Fresnedillas-Robledo-ROAD"
+#$CURDIR="Chase-M501-ROAD"
+$CURDIR="Fresnedillas-Robledo-ROAD"
 #$CURDIR="Minas-Colmenar-MTB"
 #$CURDIR="Tietar-MTB"
 

@@ -66,12 +66,24 @@ class FFMPEGAdapter:
         else:
             self.ffmpeg = "ffmpeg"
 
-    def CopyAudioStream(self, sourcefile, destfile):
+    def CopyAudioStream(self, sourcefile, destfile, offset=0, duration=0):
         outfile = next(tempfile._get_candidate_names()) + os.path.splitext(sourcefile)[1]
         #cmd = "%s -i '%s' -i '%s' -c copy -map 0:1 -map 1:0 -shortest '%s'" % (self.ffmpeg, sourcefile, destfile, outfile)
-        cmd = [ self.ffmpeg, "-loglevel", "info", "-i", "%s" % sourcefile,
-                             "-i", "%s" % destfile,
-                             "-c", "copy", "-map","0:1", "-map","1:0", "-shortest", "%s" % outfile]
+        
+        
+        cmd = [ self.ffmpeg, "-loglevel", "info", "-i", "%s" % sourcefile ]
+     
+        # if offset > 0:
+        #     cmd.append( "-ss %d" % offset)
+        
+        # if duration > 0:
+        #     cmd.append( "-t %d" % duration)
+     
+     
+        # "-shortest" removed using crop
+        cmd += [ "-i", "%s" % destfile , "-c", "copy", "-map","0:1", "-map","1:0",  "%s" % outfile]
+        
+
         print(( "Copying audio track from %s to %s" % (sourcefile, destfile)))
         print(("Invoking: " + " ".join(cmd)))
 
@@ -98,6 +110,58 @@ class FFMPEGAdapter:
 
 
 
+    def ClipAudioStream(self, sourcefile, offset=0, duration=0):
+        outfile = next(tempfile._get_candidate_names()) + os.path.splitext(sourcefile)[1]
+        outfile_2 = next(tempfile._get_candidate_names()) + os.path.splitext(sourcefile)[1]
+        #cmd = "%s -i '%s' -i '%s' -c copy -map 0:1 -map 1:0 -shortest '%s'" % (self.ffmpeg, sourcefile, destfile, outfile)
+
+        if offset == 0 and duration == 0:
+            return self.CopyAudioStream(sourcefile, destfile)
+        
+        #see https://superuser.com/questions/1631188/replace-section-of-audio-in-a-video-with-ffmpeg
+        
+        # 1 extract audio and trim it
+        # ffmpeg -i RecordingA.mp4 -vn -acodec copy audio.ogg
+        
+        cmd = [ self.ffmpeg, "-loglevel", "info", 
+               "-ss %d" % offset, "-t %d" % duration, 
+               "-i", "%s" % sourcefile,
+               "-vn", "-acodec", "copy", "%s" % outfile ]
+
+        print(( "Extracting audio track from %s -> %s (offset: %ds, duration %ds)" % (sourcefile, outfile, offset, duration)))
+        print(("Invoking: " + " ".join(cmd)))
+        out,err  = self._run( cmd )
+
+       
+        # merge
+        # ffmpeg -i RecordingA.mp4 -i final.ogg -c:v copy -c:a aac -map 0:v:0 -map 1:a:0 RecordingB.mp4
+
+        cmd = [ self.ffmpeg, "-loglevel", "info", "-i", "%s" % outfile,
+                 "-i", "%s" % destfile , "-c", "copy", "-map","0:1", "-map","1:0",  "%s" % outfile_2]
+
+        print(( "Copying audio track from %s to %s" % (outfile_2, destfile)))
+        print(("Invoking: " + " ".join(cmd)))
+
+        out,err  = self._run( cmd )
+        ##print out,err
+
+        ##
+        ## move outfile to created output.
+        ##
+
+        print(("Removing: %s" % destfile))
+        os.remove(destfile)
+        print(( "Moving: %s -> %s" % (outfile,destfile)))
+        try:
+            #os.rename(outfile, destfile)
+            shutil.copy(outfile_2, destfile)
+            os.remove(outfile_2)
+        except Exception as e:
+            if os.path.exists(destfile):
+                os.remove(destfile)
+            #os.rename(outfile, destfile)
+            shutil.copy(outfile_2, destfile)
+            os.remove(outfile_2)
 
 
 
