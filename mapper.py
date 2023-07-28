@@ -26,12 +26,16 @@ from PIL import Image, ImageDraw
 from gpxtoolbox import *
 from gpxpy import geo
 import rainbowvis
+from helpers import set_http_proxy, get_page_content
 
 Size = namedtuple('Size', 'width height')
 Point2D = namedtuple('Point', 'x y')
 
 DEBUG_ME = True
 random.seed()
+
+
+
 
 class MapItem:
 		"A container to store the data associated with the map created"
@@ -107,6 +111,7 @@ class OSMMapper(GenericMapper):
 	TILE_Y_SZ 	= 256			# tile y size from OSM Maps
 	#cachedir   	= "cache"		# directory name where cache tiles is stored.
 	debug	   	= 2				# debug level, from 0 to 10
+	MAX_ZOOM	= 19
 
 	def __init__(self, img_sz, cachedir="cache"):
 		GenericMapper.__init__(self, img_sz)
@@ -155,6 +160,8 @@ class OSMMapper(GenericMapper):
 				print("res", resolution)
 			try:
 				zoom = int(math.ceil( math.log( self.EARTH_SIZE / resolution, 2) ))
+				if zoom > self.MAX_ZOOM:
+					zoom = self.MAX_ZOOM
 			except:
 				zoom = 1
 
@@ -338,7 +345,8 @@ class OSMMapper(GenericMapper):
 	def tile2url(self,tile, zoom):
 		letters = [ 'a', 'b', 'c' ]
 		letter = letters[random.randrange(0,3)]
-		url = "http://%s.tile.openstreetmap.org/%d/%d/%d.png" % (letter, zoom, tile[0], tile[1])
+		# changed to SECURE.
+		url = "https://%s.tile.openstreetmap.org/%d/%d/%d.png" % (letter, zoom, tile[0], tile[1])
 		return url
 
 	def TileCache(self,tile,zoom):
@@ -347,6 +355,7 @@ class OSMMapper(GenericMapper):
 
 		cachedir = [self.cachedir] + url.split('/')[-4:]
 		urlp = os.sep.join(cachedir)
+		cache_tile = True
 
 		if os.path.exists(urlp):
 			r = Image.open(urlp)
@@ -359,7 +368,10 @@ class OSMMapper(GenericMapper):
 
 		# get and save
 		try:
-			fd = urllib.request.urlopen(url)
+			#set the proxy if required.
+			#set_http_proxy('proxy.addr.com:8080')
+			#fd = urllib.request.urlopen(url)
+			fd = get_page_content(url)
 			image_file = io.BytesIO(fd.read())
 			fd.close()
 			tileimage = Image.open(image_file)
@@ -367,14 +379,16 @@ class OSMMapper(GenericMapper):
 		except Exception as e:
 			# create an empty tile, and save it.
 			#
-			print("[E] Creating empty tile: TileUrl Not found: [%s]" % url)
+			print("[E] Creating empty tile: TileUrl Not found: [%s](%s))" % (url,e))
 			image_file = Image.new("RGB", (self.TILE_X_SZ, self.TILE_Y_SZ), "red")
 			tileimage = image_file
+			cache_tile = False
 		
 		dirp = os.path.dirname(urlp)
 		if not os.path.exists(dirp):
 			os.makedirs(dirp)
-		tileimage.save(urlp,"PNG")
+		if cache_tile:
+			tileimage.save(urlp,"PNG")
 		return tileimage
 
 

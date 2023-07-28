@@ -88,6 +88,7 @@ import datetime
 import time
 import timecode
 import pygame
+import gauges
 
 from engine import Engine
 from baseconfig import BaseConfig
@@ -102,26 +103,40 @@ class ClipInfo:
         self.height        = int(stream.get(cv2.CAP_PROP_FRAME_HEIGHT ))
         self.frames        = stream.get(cv2.CAP_PROP_FRAME_COUNT )
         self.fps           = stream.get(cv2.CAP_PROP_FPS )
-        self.msec          = stream.get(cv2.CAP_PROP_POS_MSEC )
         self.length        = self.frames / self.fps
         self.offset        = int(offset)
         self.duration      = int(duration)
-
+        # distance in msecs from start. Changes each time we 
+        # read a frame.
+        #self.msec          = stream.get(cv2.CAP_PROP_POS_MSEC )
+        # Metadata DATETIME in LOCALTIME format.
+        self.start_time = self.creation_date + timedelta(seconds=self.offset)
+        
+        # adjust crop_duration value
+        if self.duration > 0:
+            self.crop_duration = self.duration
+            if self.crop_duration > self.duration_m.total_seconds()-self.offset:
+                self.crop_duration = self.duration_m.total_seconds()-self.offset
+        else: 
+            self.crop_duration = self.duration_m.total_seconds()-self.offset
+        
+        
         self.gpx_info    = None
 
     def show_video_info(self):
         print("Video Information -[B]--------------------------------------------- ")
-        print("File:    \t%s"   % self.video_file)
-        print("MSEC:    \t%d"   % self.msec)
-        print("WIDTH:   \t%d"   % self.width)
-        print("HEIGHT:  \t%d"   % self.height)
-        print("FPS:     \t%f"   % self.fps)
-        print("FRAMES:  \t%d"   % self.frames)
-        print("LENGTH:  \t%f s" % self.length)
-        print("Duration:\t%s"   % self.duration_m)
-        print("CDate:   \t%s"   % self.creation_date)
-        print("Offset:  \t%s s" % self.offset)
-        print("Duration:\t%s s" % self.duration)
+        print("File:         \t%s"   % self.video_file)
+        print("WIDTH:        \t%d"   % self.width)
+        print("HEIGHT:       \t%d"   % self.height)
+        print("FPS:          \t%f"   % self.fps)
+        print("FRAMES:       \t%d"   % self.frames)
+        print("LENGTH:       \t%f s" % self.length)
+        print("Duration:     \t%s"   % self.duration_m)
+        print("CDate:        \t%s"   % self.creation_date)
+        print("Offset:       \t%s s" % self.offset)
+        print("Duration:     \t%s s" % self.duration)
+        print("Start_Time:   \t%s"   % self.start_time)
+        print("Crop Duration:\t%s s" % self.crop_duration)
         print("Video Information -[E]--------------------------------------------- ")
 
     def show_gpx_info(self):
@@ -182,25 +197,21 @@ if __name__ == "__main__":
     gpx_points = None
     
     mode = fext.lower().replace('.','')
-    crop_start = clip_info.creation_date + timedelta(seconds=clip_info.offset)
-    if clip_info.duration > 0:
-        crop_duration = clip_info.duration
-        if crop_duration > clip_info.duration_m.total_seconds()-clip_info.offset:
-            crop_duration = clip_info.duration_m.total_seconds()-clip_info.offset
-    else: 
-        crop_duration = clip_info.duration_m.total_seconds()-clip_info.offset
-    
 
-    gpx_points,gpx_info = hrmmanager.GetTimeRange(mode,
+    gpx_points,gpx_info,gpx_map_points = hrmmanager.GetTimeRange(mode,
                                                   args.gpx_file, 
-                                                  crop_start, 
-                                                  crop_duration, 
+                                                  clip_info.start_time, 
+                                                  clip_info.crop_duration,
+                                                  clip_info.creation_date,
                                                   fake_time=args.fake)
-    clip_info.gpx_info = gpx_info
+
+    clip_info.gpx_info = gpx_info             
     clip_info.show_gpx_info()
 
     if args.only_info:
         exit(0)
+
+    # TODO: check if video is in range from GPX data.
 
     if not gpx_points:
         print(("Error, can't guess type for %s. Can't parse it. Ensure is FIT or GPX file." % args.gpx_file))
@@ -260,18 +271,14 @@ if __name__ == "__main__":
     gpx_point_prev = gpx_points[gpx_index]
 
 
-    # Metadata DATETIME in LOCALTIME format.
-
-    start_time = clip_info.creation_date + timedelta(seconds=clip_info.offset)
-
     # note that VIDEO_START = GPXPOINT_START
     # watch out FAKE TIME INFO.
 
-    if args.fake: start_time = gpx_points[0].time
+    if args.fake: clip_info.start_time = gpx_points[0].time
 
     # set the current_time
 
-    current_time = start_time
+    current_time = clip_info.creation_date # the begining of the clip, instead start_date
     frame_counter = 0
 
     # if we want to create a matte (-l) for FCP.
@@ -282,21 +289,37 @@ if __name__ == "__main__":
 
 
     # begin calculate things #################################################
+    # TODO this create the elevation and OSM map. If not found, don't use
 
-    osmmaps = engine.GetItemsByName("osmmap")
-    for i in osmmaps:
-        i.set_points(gpx_points)
-        i.CreateMap()
 
-    altgraph = engine.GetItemsByName("altgraph")
-    for i in altgraph:
-        i.set_points(gpx_points)
-        i.CreateMap()
+    do_osm = False
+    do_altgraph = False
+
+    #<class 'gauges.OSMMapGauge'>
+    #<class 'gauges.AltGraphGauge'>
+
+    for item in engine.config.elements:
+       
+        if type(item) == type(gauges.OSMMapGauge()):
+            do_osm = True
+        if type(item) == type(gauges.AltGraphGauge()):
+            do_altgraph = True
+            
+    if do_osm:
+        osmmaps = engine.GetItemsByName("osmmap")
+        for i in osmmaps:
+            i.set_points(gpx_map_points)
+            i.CreateMap()
+
+    if do_altgraph:
+        altgraph = engine.GetItemsByName("altgraph")
+        for i in altgraph:
+            i.set_points(gpx_points)
+            i.CreateMap()
 
 
     distance = 0.0
     delta = 0
-
 
     #
     # if instrumentation, don't read all the frames. Read first one,
@@ -322,6 +345,8 @@ if __name__ == "__main__":
     metrics.bearing = None
 
 
+
+
     while True:
 
         # grab the current frame
@@ -333,20 +358,40 @@ if __name__ == "__main__":
             break
 
 
+        # time pointers explained.
         # get the frame delta interval
 
-        delta = stream.get(cv2.CAP_PROP_POS_MSEC)           # from the start
+        #  clip_info.creation_date
+        # |         clip_info.offset
+        # |         | 
+        # v         v
+        # B---------x---------------------------------x-----E
+        #           [     clip_info.crop_duration in seconds    ]
+        #           ^       ^
+        #           |       | current_time (adding the delta from the beginning)
+        #           clip_info.start_time
+        #
+        # 1) wait to delta is equal to offset (in seconds)
+        # 2) while current time < clip_info.start_time + duration, do the work
+        # 3) end.
+
+
+        delta = stream.get(cv2.CAP_PROP_POS_MSEC)           # current position of the file relative to the start.
         tdelta = datetime.timedelta(milliseconds=delta)
-        current_time = start_time + tdelta
+        current_time = clip_info.creation_date + tdelta     # absolute pointer from the begining of the video.
         
         frame_time = (frame_counter % clip_info.fps) * 1.0/clip_info.fps  #between 0.x and 0 (when frame change happens)
         
-        if current_time < crop_start:
-            print("CROPPING: Skipping frame")
-            continue
+        # skip the offset and calculate duration
 
-        if current_time > crop_start + datetime.timedelta(seconds=crop_duration):
-            print("CROPPING: duration reached, exit")
+        if datetime.timedelta(milliseconds=delta).total_seconds() < clip_info.offset:
+            if args.verbose >2:
+                print("CROPPING: Skipping frame %3.3f" % tdelta.total_seconds())
+            continue
+ 
+        if current_time > clip_info.start_time + datetime.timedelta(seconds=clip_info.crop_duration):
+            if args.verbose >2:
+                print("CROPPING: duration reached, exit")
             break
 
         # print("Current Time:%s , UTC: %s" % (current_time, gpxtoolbox.utc_to_local(gpx_point.time) ))
@@ -465,8 +510,15 @@ if __name__ == "__main__":
     cv2.destroyAllWindows()
     pygame.quit()
     
+    ## TODO
     # create and restore the file
     encoder = FFMPEGAdapter()
-    encoder.ClipAudioStream(args.video_file, args.output_file, clip_info.offset, clip_info.duration)
+    encoder.CopyAudioStream(args.video_file, args.output_file, offset=clip_info.offset, duration=clip_info.duration)
 
 
+    # working
+    # http://b.tile.openstreetmap.org/19/255795/197932.png
+    # 
+    # non working
+    # http://b.tile.openstreetmap.org/19/1023205/791754.png
+    # http://b.tile.openstreetmap.org/21/1023205/791754.png

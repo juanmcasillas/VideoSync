@@ -16,6 +16,8 @@ import numpy as np
 import imutils
 import cv2
 import pygame
+import urllib.request
+from urllib.request import Request, urlopen
 
 # quality settings for stream
 
@@ -24,6 +26,42 @@ QUALITY_FAST = 0.25
 QUALITY_NORMAL = 0.5
 QUALITY_GOOD = 0.75
 QUALITY_BEST = 1.0
+
+# see https://stackoverflow.com/questions/34576665/setting-proxy-to-urllib-request-python3
+def set_http_proxy(proxy):
+    if proxy == None: # Use system default setting
+        proxy_support = urllib.request.ProxyHandler()
+    elif proxy == '': # Don't use any proxy
+        proxy_support = urllib.request.ProxyHandler({})
+    else: # Use proxy
+        proxy_support = urllib.request.ProxyHandler({'http': '%s' % proxy, 'https': '%s' % proxy})
+    opener = urllib.request.build_opener(proxy_support)
+    urllib.request.install_opener(opener)
+
+
+# see https://stackoverflow.com/questions/16627227/problem-http-error-403-in-python-3-web-scraping
+# Function to get the page content
+
+def get_page_content(url, head=None):
+    """
+    Function to get the page content
+    """
+    if not head:
+        head = {
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.84 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+        'Accept-Charset': 'ISO-8859-1,utf-8;q=0.7,*;q=0.3',
+        'Accept-Encoding': 'none',
+        'Accept-Language': 'en-US,en;q=0.8',
+        'Connection': 'keep-alive',
+        #'refere': 'https://example.com',
+        #'cookie': """your cookie value ( you can get that from your web page) """
+        }
+
+
+    req = Request(url, headers=head)
+    return urlopen(req)
+
 
 class EmptyClass(): pass
 
@@ -71,17 +109,15 @@ class FFMPEGAdapter:
         #cmd = "%s -i '%s' -i '%s' -c copy -map 0:1 -map 1:0 -shortest '%s'" % (self.ffmpeg, sourcefile, destfile, outfile)
         
         
-        cmd = [ self.ffmpeg, "-loglevel", "info", "-i", "%s" % sourcefile ]
-     
-        # if offset > 0:
-        #     cmd.append( "-ss %d" % offset)
+        cmd = [ self.ffmpeg, "-loglevel", "info",  ]
+
+        cmd += [ "-ss", "%d" % offset ]
         
-        # if duration > 0:
-        #     cmd.append( "-t %d" % duration)
+        cmd += [ "-t", "%d" % duration ]
      
      
         # "-shortest" removed using crop
-        cmd += [ "-i", "%s" % destfile , "-c", "copy", "-map","0:1", "-map","1:0",  "%s" % outfile]
+        cmd += [ "-i", "%s" % sourcefile, "-i", "%s" % destfile , "-c", "copy", "-map","0:1", "-map","1:0",  "%s" % outfile]
         
 
         print(( "Copying audio track from %s to %s" % (sourcefile, destfile)))
@@ -109,8 +145,11 @@ class FFMPEGAdapter:
             os.remove(outfile)
 
 
-
-    def ClipAudioStream(self, sourcefile, offset=0, duration=0):
+    #
+    # This version does the same as before,
+    # but using 3 steps for clarity and debug purpouses.
+    # 
+    def ClipAudioStream(self, sourcefile, destfile, offset=0, duration=0):
         outfile = next(tempfile._get_candidate_names()) + os.path.splitext(sourcefile)[1]
         outfile_2 = next(tempfile._get_candidate_names()) + os.path.splitext(sourcefile)[1]
         #cmd = "%s -i '%s' -i '%s' -c copy -map 0:1 -map 1:0 -shortest '%s'" % (self.ffmpeg, sourcefile, destfile, outfile)
@@ -124,34 +163,40 @@ class FFMPEGAdapter:
         # ffmpeg -i RecordingA.mp4 -vn -acodec copy audio.ogg
         
         cmd = [ self.ffmpeg, "-loglevel", "info", 
-               "-ss %d" % offset, "-t %d" % duration, 
+               "-ss","%d" % offset, "-t", "%d" % duration, 
                "-i", "%s" % sourcefile,
                "-vn", "-acodec", "copy", "%s" % outfile ]
 
         print(( "Extracting audio track from %s -> %s (offset: %ds, duration %ds)" % (sourcefile, outfile, offset, duration)))
         print(("Invoking: " + " ".join(cmd)))
         out,err  = self._run( cmd )
-
+        #print(out,err)
        
         # merge
         # ffmpeg -i RecordingA.mp4 -i final.ogg -c:v copy -c:a aac -map 0:v:0 -map 1:a:0 RecordingB.mp4
 
+        # "0:1"
         cmd = [ self.ffmpeg, "-loglevel", "info", "-i", "%s" % outfile,
-                 "-i", "%s" % destfile , "-c", "copy", "-map","0:1", "-map","1:0",  "%s" % outfile_2]
+                 "-i", "%s" % destfile , "-c", "copy", "-map","0:0", "-map","1:0",  "%s" % outfile_2 ]
 
-        print(( "Copying audio track from %s to %s" % (outfile_2, destfile)))
+        print(( "Copying audio track from %s to %s" % (outfile, destfile)))
         print(("Invoking: " + " ".join(cmd)))
 
         out,err  = self._run( cmd )
-        ##print out,err
-
+        #print(out,err)
         ##
         ## move outfile to created output.
         ##
 
         print(("Removing: %s" % destfile))
-        os.remove(destfile)
-        print(( "Moving: %s -> %s" % (outfile,destfile)))
+        print(("Removing: %s" % outfile))
+        try:
+            os.remove(destfile)
+            os.remove(outfile)
+        except Exception as e:
+            pass
+
+        print(( "Moving: %s -> %s" % (outfile_2,destfile)))
         try:
             #os.rename(outfile, destfile)
             shutil.copy(outfile_2, destfile)

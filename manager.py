@@ -1143,7 +1143,7 @@ class HRMManager():
     #
     #########################################################################
 
-    def GetTimeRange(self, mode, data_file, instamp, deltat, fake_time=False):
+    def GetTimeRange(self, mode, data_file, instamp, deltat, beginstamp, fake_time=False):
         """
         data_file: the name of the file to be loaded (Garmin FIT)
         instamp: stamp time when the segments start
@@ -1171,6 +1171,10 @@ class HRMManager():
         else:
              raise Exception("Unknown mode: %s", mode)
 
+        # first, get all the points for the BB (maps) for full video
+        # then get only working points to process them
+
+        map_r,_,_ = self.CalculateTimeRange(points, beginstamp, deltat)
         r,start_time,end_time = self.CalculateTimeRange(points, instamp, deltat, fake_time)
 
         if self.verbose >= 1:
@@ -1192,7 +1196,7 @@ class HRMManager():
 
         info.start_time_all = t_f(points[0].time)
         info.end_time_all = t_f(points[-1].time)
-        return r,info
+        return r,info,map_r
 
 
     
