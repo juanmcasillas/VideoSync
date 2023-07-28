@@ -5,12 +5,12 @@ cd ..
 
 #$CURDIR="Cenicientos-ROAD"
 #$CURDIR="Chase-M501-ROAD"
-$CURDIR="Fresnedillas-Robledo-ROAD"
-#$CURDIR="Minas-Colmenar-MTB"
+#$CURDIR="Fresnedillas-Robledo-ROAD"
+$CURDIR="Minas-Colmenar-MTB"
 #$CURDIR="Tietar-MTB"
 
 $WORKDIR="$SAMPLESDIR\\$CURDIR"
-& $PYTHON hudint.py -t "$CURDIR" -s -v templates\\config_white.xml $WORKDIR\\data.fit $WORKDIR\\video1.MP4 $WORKDIR\\output.avi
+& $PYTHON hudint.py -t "$CURDIR" -s -v templates\\config_white.xml $WORKDIR\\data.fit $WORKDIR\\video2.MP4 $WORKDIR\\output.avi -o 60 -d 5
 
 cd tests
 

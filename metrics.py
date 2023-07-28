@@ -193,7 +193,7 @@ class DataSerie(object):
 
 #DataSerie = namedtuple('DataSerie',['time', 'latitude', 'longitude', 'elevation', 'distance_delta', 'speed', 'slope', 'elevation_delta'])
 
-def Smooth(series, elements):
+def Smooth(series, elements, size_hint=0):
     """
     get the elements array items and extract them as arrays. Then, smooth it, and build again the DataSerie, but smoothed.
     """
@@ -209,8 +209,14 @@ def Smooth(series, elements):
 
     ## r has a dict with all the items. Smooth them.
 
+    window_size = 71
+    if size_hint > 0:
+        if size_hint < 20:
+            window_size = 11
+
     for e in elements:
-        r[e] = savitzky_golay(np.array(r[e]), 71, 5)
+        #r[e] = savitzky_golay(np.array(r[e]), 71, 5)
+        r[e] = savitzky_golay(np.array(r[e]), window_size, 5)
 
 
     ## build again the dataserie, but smoothed.
@@ -346,7 +352,7 @@ def CreateSeries(points):
             bearing = 0.0
             time_delta = timedelta(seconds=0)
         else:
-            distance_delta = Distance(points[i-1], points[i])
+            distance_delta = math.fabs(Distance(points[i-1], points[i]))
             time_delta = points[i].time - points[i-1].time
             elev_delta = points[i].elevation - points[i-1].elevation
 

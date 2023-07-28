@@ -90,6 +90,10 @@ import timecode
 import pygame
 import gauges
 
+# experimental gopro2gpx
+
+from gopro2gpx import gopro2gpx
+
 from engine import Engine
 from baseconfig import BaseConfig
 
@@ -98,6 +102,9 @@ class ClipInfo:
         self.video_file    = video_file
         metadata           = metaDataFile(self.video_file)
         self.duration_m    = metadata.get('duration')
+        #
+        # this works fine if using utc_to_local() in some cases
+        #
         self.creation_date = metadata.get('creation_date')
         self.width         = int(stream.get(cv2.CAP_PROP_FRAME_WIDTH ))
         self.height        = int(stream.get(cv2.CAP_PROP_FRAME_HEIGHT ))
@@ -130,6 +137,8 @@ class ClipInfo:
         print("HEIGHT:       \t%d"   % self.height)
         print("FPS:          \t%f"   % self.fps)
         print("FRAMES:       \t%d"   % self.frames)
+        print("LENGTH(FPS):  \t%3.2f"% (self.frames * (1.0/self.fps)))
+        
         print("LENGTH:       \t%f s" % self.length)
         print("Duration:     \t%s"   % self.duration_m)
         print("CDate:        \t%s"   % self.creation_date)
@@ -175,6 +184,7 @@ if __name__ == "__main__":
     parser.add_argument("-l", "--layer", help="Create a layer to use in Final Cut (Overlay)", action="store_true")
     parser.add_argument("-s", "--show", help="Show frames during encoding", action="store_true")
     parser.add_argument("-i", "--only-info", help="Show info then exit", action="store_true", default=False)
+    parser.add_argument("-g", "--gopro", help="Read the GPX data from goproFile", action="store_true", default=False)
     parser.add_argument("-t", "--title", help="Title to write")
     parser.add_argument("config_file", help="XML configuration file")
     parser.add_argument("gpx_file", help="GPX 1.1 file [fit|gpx]")
@@ -193,11 +203,26 @@ if __name__ == "__main__":
     # video to the GPX (I have no real data).
     # autodectect file, and get the parser acording to extension
 
-    fname,fext = os.path.splitext(args.gpx_file)
-    gpx_points = None
-    
-    mode = fext.lower().replace('.','')
+    if args.gopro:
+        if args.verbose > 1:
+            print("Running Gopro2GPX first")
 
+        file_name, file_extension = os.path.splitext(args.video_file)
+        gopro_args = EmptyClass()
+        gopro_args.verbose = args.verbose
+        gopro_args.outputfile = file_name # adds automatically .gpx
+        gopro_args.files = [ args.video_file ]
+        gopro_args.binary = False
+        gopro_args.skip = True
+        gopro2gpx.main_core(gopro_args)
+        args.gpx_file = "%s.gpx" % file_name
+
+        if args.verbose > 1:
+            print("Done. Mapped file to %s" % args.gpx_file)
+
+
+    fname,fext = os.path.splitext(args.gpx_file)
+    mode = fext.lower().replace('.','')
     gpx_points,gpx_info,gpx_map_points = hrmmanager.GetTimeRange(mode,
                                                   args.gpx_file, 
                                                   clip_info.start_time, 
@@ -218,7 +243,7 @@ if __name__ == "__main__":
         sys.exit(1)
 
     data_series = CreateSeries(gpx_points)
-    data_series = Smooth(data_series, [ "slope", "speed" ] )
+    data_series = Smooth(data_series, [ "slope", "speed" ],len(gpx_points) )
     
     # save dump for testing
     if False:
@@ -228,6 +253,7 @@ if __name__ == "__main__":
         f.write(gpxtxt)
         f.close()
 
+    if False:
         print(data_series[0].header())
         for i in data_series:
             print(i)
@@ -274,7 +300,8 @@ if __name__ == "__main__":
     # note that VIDEO_START = GPXPOINT_START
     # watch out FAKE TIME INFO.
 
-    if args.fake: clip_info.start_time = gpx_points[0].time
+    if args.fake: 
+        clip_info.start_time = gpx_points[0].time
 
     # set the current_time
 

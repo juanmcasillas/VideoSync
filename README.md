@@ -16,6 +16,10 @@ python code to 3.11.
 * `vulture`: `vulture.exe hudint.py -t "TEST" -s -v .\templates\config_white.xml .\samples\Tietar-MTB\data.fit .\samples\Tietar-MTB\video1.MP4 .\samples\Tietar-MTB\ouput.avi`
 * `coverage`: `coverage.exe run hudint.py -t "TEST" -s -v .\templates\config_white.xml .\samples\Tietar-MTB\data.fit .\samples\Tietar-MTB\video1.MP4 .\samples\Tietar-MTB\ouput.avi`
 
+## GOPRO2GPX
+
+git clone --recurse-submodules https://github.com/chaconinc/MainProject
+
 ### H264 Encoder:
 
 Solution found [here](https://stackoverflow.com/questions/41972503/could-not-open-codec-libopenh264-unspecified-error)
