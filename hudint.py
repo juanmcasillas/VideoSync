@@ -81,6 +81,10 @@ from collections import deque
 import numpy as np
 import argparse
 import imutils
+#https://docs.opencv.org/4.x/d6/dea/tutorial_env_reference.html
+#this doesnt work.
+import os
+os.environ["OPENCV_FFMPEG_READ_ATTEMPTS"] = "8192"
 import cv2
 
 import math
@@ -116,9 +120,9 @@ class ClipInfo:
         # creation date in the go_pro file, is in Localtime,
         # so figure out the current localtime, and do the
         # trick to convert to UTC.
-        local_tz = datetime.datetime.utcnow().astimezone().tzinfo
+        self.local_tz      = datetime.datetime.utcnow().astimezone().tzinfo
         self.creation_date = datetime.datetime.fromisoformat(json_metadata["tags"]["creation_time"])
-        self.creation_date = self.creation_date.replace(tzinfo=local_tz)
+        self.creation_date = self.creation_date.replace(tzinfo=self.local_tz)
         self.creation_date = self.creation_date.astimezone(pytz.UTC)
         
         self.width         = int(stream.get(cv2.CAP_PROP_FRAME_WIDTH ))
@@ -197,7 +201,6 @@ if __name__ == "__main__":
     parser.add_argument("-o", "--offset", help="Offset in seconds from Video Start", action="store", default=0)
     parser.add_argument("-d", "--duration", help="Duration in seconds from Video Start or offset", action="store", default=0)
     parser.add_argument("-v", "--verbose", help="Show data about file and processing", action="count")
-    parser.add_argument("-f", "--fake", help="Use GPX start date insted the vioeo one (for debug)", action="store_true")
     parser.add_argument("-l", "--layer", help="Create a layer to use in Final Cut (Overlay)", action="store_true")
     parser.add_argument("-s", "--show", help="Show frames during encoding", action="store_true")
     parser.add_argument("-i", "--only-info", help="Show info then exit", action="store_true", default=False)
@@ -246,8 +249,7 @@ if __name__ == "__main__":
                                                   args.gpx_file, 
                                                   clip_info.start_time, 
                                                   clip_info.crop_duration,
-                                                  clip_info.creation_date,
-                                                  fake_time=args.fake)
+                                                  clip_info.creation_date)
 
     clip_info.gpx_info = gpx_info             
     clip_info.show_gpx_info()
@@ -316,12 +318,6 @@ if __name__ == "__main__":
     gpx_point_prev = gpx_points[gpx_index]
 
 
-    # note that VIDEO_START = GPXPOINT_START
-    # watch out FAKE TIME INFO.
-
-    if args.fake: 
-        clip_info.start_time = gpx_points[0].time
-
     # set the current_time
 
     current_time = clip_info.creation_date # the begining of the clip, instead start_date
@@ -354,7 +350,7 @@ if __name__ == "__main__":
     if do_osm:
         osmmaps = engine.GetItemsByName("osmmap")
         for i in osmmaps:
-            i.set_points(gpx_map_points)
+            i.set_points(gpx_points)
             i.CreateMap()
 
     if do_altgraph:
@@ -477,24 +473,24 @@ if __name__ == "__main__":
             metrics.bearing = data_series[gpx_index].bearing
 
         
-        metrics.time = current_time
+        metrics.time = current_time.astimezone(clip_info.local_tz)
         # should be previous ?
         metrics.position_index = gpx_index
         metrics.current_position =  gpx_point
         
 
-        if "extensions" in list(gpx_point.__dict__.keys()) and gpx_point.extensions:
+        if gpx_point.extensions[0]:
 
             for ext_item in [ "cadence", "temperature", "hr", "power"]:
 
-                if ext_item in list(gpx_point.extensions.keys()):
+                if ext_item in list(gpx_point.extensions[0].keys()):
                     
                     if engine.config.interpolate:
-                        metrics.__dict__[ext_item] = Interpolate( gpx_point_prev.time , gpx_point_prev.extensions[ext_item],
-                                                                  gpx_point.time , gpx_point.extensions[ext_item],
+                        metrics.__dict__[ext_item] = Interpolate( gpx_point_prev.time , gpx_point_prev.extensions[0][ext_item],
+                                                                  gpx_point.time , gpx_point.extensions[0][ext_item],
                                                                   frame_time )
                     else:
-                        metrics.__dict__[ext_item] = gpx_point.extensions[ext_item]
+                        metrics.__dict__[ext_item] = gpx_point.extensions[0][ext_item]
                
 
         # update graphics engine with data.
@@ -560,7 +556,7 @@ if __name__ == "__main__":
     ## TODO
     # create and restore the file
     encoder = FFMPEGAdapter()
-    encoder.CopyAudioStream(args.video_file, args.output_file, offset=clip_info.offset, duration=clip_info.duration)
+    encoder.CopyAudioStream(args.video_file, args.output_file, offset=clip_info.offset, duration=clip_info.crop_duration)
 
 
     # working

@@ -117,9 +117,9 @@ class FFMPEGAdapter:
         
         cmd = [ self.ffmpeg, "-loglevel", "info",  ]
 
-        cmd += [ "-ss", "%d" % offset ]
+        cmd += [ "-ss", "%f" % offset ]
         
-        cmd += [ "-t", "%d" % duration ]
+        cmd += [ "-t", "%f" % duration ]
      
      
         # "-shortest" removed using crop
@@ -169,7 +169,7 @@ class FFMPEGAdapter:
         # ffmpeg -i RecordingA.mp4 -vn -acodec copy audio.ogg
         
         cmd = [ self.ffmpeg, "-loglevel", "info", 
-               "-ss","%d" % offset, "-t", "%d" % duration, 
+               "-ss","%f" % offset, "-t", "%f" % duration, 
                "-i", "%s" % sourcefile,
                "-vn", "-acodec", "copy", "%s" % outfile ]
 

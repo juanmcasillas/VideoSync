@@ -26,10 +26,54 @@ def get_page_content(url, head=None):
 
 
 
+import gpxpy.gpx
+import sys
+import datetime
 
+import os
+os.environ["OPENCV_FFMPEG_READ_ATTEMPTS"] = "8192"
+import cv2
 
 
 if __name__ == "__main__":
+
+    vfile = ".\samples\gopro7\GH011502_NS.mp4"
+    stream = cv2.VideoCapture(vfile)
+    cv2.OPENCV_FFMPEG_READ_ATTEMPTS = 8192
+    while True:
+
+        (grabbed, frame) = stream.read()
+        if  not grabbed:
+            break
+        cv2.imshow("Frame", frame)
+        key = cv2.pollKey()
+
+        # if the 'q' key is pressed, stop the loop
+        if key == ord("q"):
+            break
+
+    stream.release()
+    cv2.destroyAllWindows()
+    sys.exit(0)
+
+    latitude = 40.0
+    longitude = 20.0
+    altitude = 10.0
+    timestamp = datetime.datetime.utcnow()
+    p = gpxpy.gpx.GPXTrackPoint(latitude, longitude, altitude, timestamp)
+
+    p.extensions.append({})
+    p.extensions[0]['hr'] = 100
+    p.extensions[0]['cadence'] = 75
+    p.extensions[0]['temperature'] = 32
+    p.extensions[0]['power'] = 178
+    
+    if p.extensions[0]:
+        for ext_item in [ "cadence", "temperature", "hr", "power"]:
+            if ext_item in list(p.extensions[0].keys()):
+                print(ext_item)
+
+
     url = "https://b.tile.openstreetmap.org/19/255800/197938.png"
     fd = get_page_content(url)
     image_file = io.BytesIO(fd.read())

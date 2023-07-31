@@ -45,7 +45,7 @@ if __name__ == "__main__":
     fps = 50.0
 
     hrmmanager = HRMManager(verbose=True, overwrite=True)
-    gpx_points = hrmmanager.GetTimeRangeFIT(args.gpx_file, 0, -1, fake_time=True)
+    gpx_points = hrmmanager.GetTimeRangeFIT(args.gpx_file, 0, -1)
     data_series = CreateSeries(gpx_points)
     data_series = Smooth(data_series, [ "slope" ])
 

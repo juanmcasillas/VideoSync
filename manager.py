@@ -1051,12 +1051,12 @@ class HRMManager():
     #
     #########################################################################
 
-    def CalculateTimeRange(self, points, instamp=0, deltat=0, fake_time=False):
+    def CalculateTimeRange(self, points, instamp=0, deltat=0):
 
         # NOT INSERT BEFORE AND AFTER POINTS (08/07/2016)
         r = []
 
-        if instamp == 0 and deltat == -1 and fake_time== True:
+        if instamp == 0 and deltat == -1:
             # get all the points for metrics
             print("Getting al the points")
             for p in points: r.append(p)
@@ -1065,18 +1065,14 @@ class HRMManager():
 
         start_time = instamp
         
-        if fake_time:
-            start_time = (points[0].time) + timedelta(seconds=instamp)
-
         end_time = start_time + timedelta(seconds=deltat)
 
         
         # now, iterate from instamp to deltat.
- 
         NoneInserted = True
         for i in range(len(points)):
             p = points[i]
-
+            
             #putct = (p.time - datetime(1970, 1, 1)).total_seconds()
             #tutc = (start_time - datetime(1970, 1, 1)).total_seconds()
             #print putct, tutc, tutc + deltat
@@ -1093,7 +1089,10 @@ class HRMManager():
             # print(type(start_time))
             # print(start_time)
             # print("==")
+            
             if p.time >= start_time and p.time <= end_time:
+
+            
                 if len(r) == 0:
                     r.append(p)
                 elif r[-1].latitude != p.latitude or r[-1].longitude != p.longitude or r[-1].time != p.time:
@@ -1108,9 +1107,6 @@ class HRMManager():
                 ##r.append(p)
                 break
 
-        # debug things
-
-  
         #print("CalculatedTimeRange: START: %s - END: %s (%s) #Points: %d" % \
         #      (start_time, end_time, timedelta(seconds=deltat),len(r)))
 
@@ -1147,7 +1143,7 @@ class HRMManager():
     #
     #########################################################################
 
-    def GetTimeRange(self, mode, data_file, instamp, deltat, beginstamp, fake_time=False):
+    def GetTimeRange(self, mode, data_file, instamp, deltat, beginstamp):
         """
         data_file: the name of the file to be loaded (Garmin FIT)
         instamp: stamp time when the segments start
@@ -1179,10 +1175,10 @@ class HRMManager():
         # first, get all the points for the BB (maps) for full video
         # then get only working points to process them
 
-        map_r,_,_ = self.CalculateTimeRange(points, beginstamp, deltat)
-        r,start_time,end_time = self.CalculateTimeRange(points, instamp, deltat, fake_time)
 
-        
+        map_r,_,_ = self.CalculateTimeRange(points, beginstamp, deltat)
+        r,start_time,end_time = self.CalculateTimeRange(points, instamp, deltat)
+
         
         if self.verbose >= 1:
             print(self.LOG("END %s '%s' '%s' '%s'" % (mode, data_file, instamp, deltat)))
@@ -1794,25 +1790,26 @@ class HRMManager():
                 left_pedal_smoothness = self.FIT_getvalue(message, "left_pedal_smoothness", 0.0)
                 left_torque_effectiveness = self.FIT_getvalue(message, "left_torque_effectiveness", 0.0)
                 timestamp = message.get('timestamp').value
-                
+                timestamp = timestamp.replace(tzinfo=timezone.utc)
                 #def utc_to_local(utc_dt):
                 #    return utc_dt.replace(tzinfo=timezone.utc).astimezone(tz=None)
                 # convert to localtime fit files
                 #timestamp = timestamp.replace(tzinfo=timezone.utc).astimezone(tz=None)
 
                 
-                p = GPXTrackPoint(latitude, longitude, altitude, timestamp, extensions={})
-                p.extensions['hr'] = heart_rate
-                p.extensions['cad'] = cadence
-                p.extensions['cadence'] = cadence
+                p = GPXTrackPoint(latitude, longitude, altitude, timestamp)
+                p.extensions.append({})
+                p.extensions[0]['hr'] = heart_rate
+                p.extensions[0]['cad'] = cadence
+                p.extensions[0]['cadence'] = cadence
                 # non compliant extensions
-                p.extensions['speed'] = speed
-                p.extensions['temperature'] = temperature
-                p.extensions['atemp'] = temperature
-                p.extensions['power'] = power
-                p.extensions['distance'] = distance
-                p.extensions['left_pedal_smoothness'] = left_pedal_smoothness
-                p.extensions['left_torque_effectiveness'] = left_torque_effectiveness
+                p.extensions[0]['speed'] = speed
+                p.extensions[0]['temperature'] = temperature
+                p.extensions[0]['atemp'] = temperature
+                p.extensions[0]['power'] = power
+                p.extensions[0]['distance'] = distance
+                p.extensions[0]['left_pedal_smoothness'] = left_pedal_smoothness
+                p.extensions[0]['left_torque_effectiveness'] = left_torque_effectiveness
 
                 points.append(p)
 

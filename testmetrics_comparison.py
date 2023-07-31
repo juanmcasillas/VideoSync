@@ -10,7 +10,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     hrmmanager = HRMManager(verbose=True, overwrite=True)
-    gpx_points = hrmmanager.GetTimeRangeFIT(args.gpx_file, 0, -1, fake_time=True)
+    gpx_points = hrmmanager.GetTimeRangeFIT(args.gpx_file, 0, -1)
 
     series = CreateSeries(gpx_points)
     series_s = CreateSeries(gpx_points)
