@@ -1,6 +1,7 @@
 
-from hachoir.parser import createParser
-from hachoir.metadata import extractMetadata
+# removed due using ffprobe - json format.
+#from hachoir.parser import createParser
+#from hachoir.metadata import extractMetadata
 
 
 import os
@@ -18,6 +19,8 @@ import cv2
 import pygame
 import urllib.request
 from urllib.request import Request, urlopen
+
+import json
 
 # quality settings for stream
 
@@ -101,8 +104,11 @@ class FFMPEGAdapter:
     def __init__(self):
         if platform.system() == "Windows":
             self.ffmpeg = "C:\\dev\\ffmpeg\\bin\\ffmpeg.exe"
+            self.ffprobe = "C:\\dev\\ffmpeg\\bin\\ffprobe.exe"
+            
         else:
             self.ffmpeg = "ffmpeg"
+            self.ffprobe = "ffprobe"
 
     def CopyAudioStream(self, sourcefile, destfile, offset=0, duration=0):
         outfile = next(tempfile._get_candidate_names()) + os.path.splitext(sourcefile)[1]
@@ -209,6 +215,18 @@ class FFMPEGAdapter:
             os.remove(outfile_2)
 
 
+    def GetJsonMetadata(self, fname, tag=None):
+        cmd = [ self.ffprobe, 
+                "-v", "quiet", "-print_format", "json", "-show_format", "-show_streams", "%s" % fname ]
+        out,err  = self._run( cmd )
+        try:
+            data = json.loads(out)
+        except json.JSONDecodeError as e:
+            print("Error getting json metadata for %s (%s)" % (fname, e))
+        
+        if not tag:
+            return(data)
+        return data[tag]
 
 
     def _run(self, cmd):

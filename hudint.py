@@ -89,6 +89,7 @@ import time
 import timecode
 import pygame
 import gauges
+import pytz
 
 # experimental gopro2gpx
 
@@ -99,33 +100,49 @@ from baseconfig import BaseConfig
 
 class ClipInfo:
     def __init__(self, video_file, stream, offset=0, duration=0):
+        
+        ffmhelper = FFMPEGAdapter()
+
         self.video_file    = video_file
-        metadata           = metaDataFile(self.video_file)
-        self.duration_m    = metadata.get('duration')
+        json_metadata      = ffmhelper.GetJsonMetadata(self.video_file,tag="format") 
+    
+        #metadata           = metaDataFile(self.video_file)
+        #self.duration_m    = metadata.get('duration')
+        #self.creation_date = metadata.get('creation_date')
         #
-        # this works fine if using utc_to_local() in some cases
         #
-        self.creation_date = metadata.get('creation_date')
+        
+        self.duration_m    = float(json_metadata["duration"])
+        # creation date in the go_pro file, is in Localtime,
+        # so figure out the current localtime, and do the
+        # trick to convert to UTC.
+        local_tz = datetime.datetime.utcnow().astimezone().tzinfo
+        self.creation_date = datetime.datetime.fromisoformat(json_metadata["tags"]["creation_time"])
+        self.creation_date = self.creation_date.replace(tzinfo=local_tz)
+        self.creation_date = self.creation_date.astimezone(pytz.UTC)
+        
         self.width         = int(stream.get(cv2.CAP_PROP_FRAME_WIDTH ))
         self.height        = int(stream.get(cv2.CAP_PROP_FRAME_HEIGHT ))
         self.frames        = stream.get(cv2.CAP_PROP_FRAME_COUNT )
         self.fps           = stream.get(cv2.CAP_PROP_FPS )
         self.length        = self.frames / self.fps
-        self.offset        = int(offset)
-        self.duration      = int(duration)
+        self.offset        = float(offset)
+        self.duration      = float(duration)
         # distance in msecs from start. Changes each time we 
         # read a frame.
         #self.msec          = stream.get(cv2.CAP_PROP_POS_MSEC )
-        # Metadata DATETIME in LOCALTIME format.
+        # Metadata DATETIME is in LOCALTIME format.
         self.start_time = self.creation_date + timedelta(seconds=self.offset)
         
+     
+
         # adjust crop_duration value
         if self.duration > 0:
             self.crop_duration = self.duration
-            if self.crop_duration > self.duration_m.total_seconds()-self.offset:
-                self.crop_duration = self.duration_m.total_seconds()-self.offset
+            if self.crop_duration > self.duration_m-self.offset:
+                self.crop_duration = self.duration_m-self.offset
         else: 
-            self.crop_duration = self.duration_m.total_seconds()-self.offset
+            self.crop_duration = self.duration_m-self.offset
         
         
         self.gpx_info    = None
@@ -195,6 +212,8 @@ if __name__ == "__main__":
     hrmmanager = HRMManager(verbose=args.verbose)
     stream = cv2.VideoCapture(args.video_file)
     clip_info = ClipInfo(args.video_file, stream, offset=args.offset, duration=args.duration)
+
+
 
     clip_info.show_video_info()
 
@@ -422,7 +441,8 @@ if __name__ == "__main__":
             break
 
         # print("Current Time:%s , UTC: %s" % (current_time, gpxtoolbox.utc_to_local(gpx_point.time) ))
-        if current_time > gpxtoolbox.utc_to_local(gpx_point.time):
+        # if current_time > gpxtoolbox.utc_to_local(gpx_point.time):
+        if current_time > gpx_point.time:
             #
             # move point. If last one, stick to it if it is the same, skip it ahead
             #

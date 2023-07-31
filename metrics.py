@@ -35,8 +35,8 @@ def DistanceI(A, B, tdelta, tag=""):
     # d has the distance from A, B, complete.
     #tdiff = B.time - A.time
      
-    x1 = getseconds(gpxtoolbox.utc_to_local(A.time))
-    x2 = getseconds(gpxtoolbox.utc_to_local(B.time))
+    x1 = getseconds(A.time)
+    x2 = getseconds(B.time)
     
     if type(tdelta) != float:
         tdelta = getseconds(tdelta) + (tdelta.microsecond / 1000000.0) - x1
@@ -91,8 +91,8 @@ def Interpolate( x1, y1, x2, y2, tdelta ):
     #
 
 
-    x1 = getseconds(gpxtoolbox.utc_to_local(x1))
-    x2 = getseconds(gpxtoolbox.utc_to_local(x2))
+    x1 = getseconds(x1)
+    x2 = getseconds(x2)
     #tdelta = getseconds(tdelta) + (tdelta.microsecond / 1000000.0)
 
     # using now tdelta as seconds after X1.
@@ -366,7 +366,7 @@ def CreateSeries(points):
 
             # calculate bearing if there is some movement (at least, 0.2m)
             if distance_delta > 0.2:
-                bearing = geo.bearing(points[i-1], points[i])
+                bearing = gpxtoolbox.bearing(points[i-1], points[i])
 
 
             #print("%3.2f %3.2f %3.2f %3.2f %3.2f %3.2f" % (slope_distance_acc, slope_space, points[i].elevation, elevation_begin, points[i].elevation-elevation_begin, slope))

@@ -482,8 +482,6 @@ class HRMManager():
             p.time = p.time + timedelta(hours=672)
             p.time = p.time - timedelta(hours=1)
 
-          print(p.time)
-
 
 
         xml = gpx.CreateGPX11(points)
@@ -1068,7 +1066,7 @@ class HRMManager():
         start_time = instamp
         
         if fake_time:
-            start_time = utc_to_local(points[0].time) + timedelta(seconds=instamp)
+            start_time = (points[0].time) + timedelta(seconds=instamp)
 
         end_time = start_time + timedelta(seconds=deltat)
 
@@ -1089,17 +1087,23 @@ class HRMManager():
             #    NoneInserted = False
                 ##r.append(p)
 
-            if utc_to_local(p.time) >= start_time and utc_to_local(p.time) <= end_time:
+            # print("--")
+            # print(type(p.time))
+            # print(p.time)
+            # print(type(start_time))
+            # print(start_time)
+            # print("==")
+            if p.time >= start_time and p.time <= end_time:
                 if len(r) == 0:
                     r.append(p)
-                elif r[-1].latitude != p.latitude and r[-1].longitude != p.longitude:
+                elif r[-1].latitude != p.latitude or r[-1].longitude != p.longitude or r[-1].time != p.time:
                     r.append(p)
                 else:
-                    print("Duplicated Point: ", p)
+                    print("Duplicated Point: ", p, r[-1])
                     #r.append(p)
 
             # hack ... not to run all the points
-            if utc_to_local(p.time) > end_time:
+            if p.time > end_time:
                 # insert the current point (last) and go out
                 ##r.append(p)
                 break
@@ -1163,6 +1167,7 @@ class HRMManager():
             try:
                 gpxmanager = GPXToolBox()
                 gpxmanager.LoadFiles(gpx11=data_file)
+
             except Exception as e:
                 raise Exception("Error while parsing %s: %s" % (data_file, e))
             gpx = gpxmanager.gpx11
@@ -1177,6 +1182,8 @@ class HRMManager():
         map_r,_,_ = self.CalculateTimeRange(points, beginstamp, deltat)
         r,start_time,end_time = self.CalculateTimeRange(points, instamp, deltat, fake_time)
 
+        
+        
         if self.verbose >= 1:
             print(self.LOG("END %s '%s' '%s' '%s'" % (mode, data_file, instamp, deltat)))
 
@@ -1192,7 +1199,7 @@ class HRMManager():
 
         if mode == "fit":
             # time is in UTC, so change it.
-            t_f = lambda x: utc_to_local(x)
+            t_f = lambda x: x
 
         info.start_time_all = t_f(points[0].time)
         info.end_time_all = t_f(points[-1].time)
