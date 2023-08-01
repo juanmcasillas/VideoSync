@@ -923,8 +923,8 @@ class AltGraphGauge(OneValueGauge):
         # calculate space based on distance instead gpx_points
         #
         #xincr = (self.config.graph.size[0]-(2*xgap)) / float((len(self.gpx_points)-1))
-        xincr = (self.config.graph.size[0]-(2*xgap)) / self.track_length
-        yincr = (self.config.graph.size[1]-(2*ygap)) / delta_elevation
+        xincr = (self.config.graph.size[0]-(2*xgap)) / self.track_length if  self.track_length > 0 else 0
+        yincr = (self.config.graph.size[1]-(2*ygap)) / delta_elevation   if delta_elevation > 0 else 0
 
         fill_points = []
 
@@ -1053,8 +1053,8 @@ class AltGraphGauge(OneValueGauge):
         # calculate space.
         #
         #xincr = (self.config.graph.size[0]-(2*xgap)) / float((len(self.gpx_points)-1))
-        xincr = (self.config.graph.size[0]-(2*xgap)) / self.track_length
-        yincr = (self.config.graph.size[1]-(2*ygap)) / delta_elevation
+        xincr = (self.config.graph.size[0]-(2*xgap)) / self.track_length if self.track_length > 0 else 0
+        yincr = (self.config.graph.size[1]-(2*ygap)) / delta_elevation   if delta_elevation > 0 else 0
 
         
         if not self.distance:

@@ -57,10 +57,7 @@
 ##    - Basic interface (speed, slope, elev ...)
 ##    - Advanced (Bike information)
 
-
-
 import sys
-
 
 from collections import namedtuple
 import subprocess
@@ -69,8 +66,6 @@ import os
 import os.path
 from manager import HRMManager
 from mapper import *
-
-
 
 import gpxpy 
 import gpxtoolbox
@@ -81,10 +76,6 @@ from collections import deque
 import numpy as np
 import argparse
 import imutils
-#https://docs.opencv.org/4.x/d6/dea/tutorial_env_reference.html
-#this doesnt work.
-import os
-os.environ["OPENCV_FFMPEG_READ_ATTEMPTS"] = "8192"
 import cv2
 
 import math
@@ -182,11 +173,6 @@ class ClipInfo:
         print("end (all):      \t%s"   % self.gpx_info.end_time_all)
         print("duration (all): \t%s"   % (self.gpx_info.end_time_all - self.gpx_info.start_time_all))
         print("GPX Information -[E]----------------------------------------------- ")
-
-
-    
-
-
 
 
 # ############################################################################
@@ -340,7 +326,7 @@ if __name__ == "__main__":
 
     if args.layer:
         # match the openCV frame format
-        background_surface_np = np.zeros( (clip_info.height, clip_info.width, 3), np.uint8 )
+        background_surface_np = np.zeros( (clip_info.height, clip_info.width, 4), np.uint8 )
 
 
     # begin calculate things #################################################
@@ -401,16 +387,17 @@ if __name__ == "__main__":
 
 
 
-
+    delta = 0.0
     while True:
-
+  
         # grab the current frame
         # if we are viewing a video and we did not grab a frame,
         # then we have reached the end of the video
         
-        (grabbed, frame) = stream.read()
-        if args.video_file and not grabbed:
-            break
+        if not args.layer:
+            (grabbed, frame) = stream.read()
+            if args.video_file and not grabbed:
+                break
 
 
         # time pointers explained.
@@ -430,8 +417,11 @@ if __name__ == "__main__":
         # 2) while current time < clip_info.start_time + duration, do the work
         # 3) end.
 
-
-        delta = stream.get(cv2.CAP_PROP_POS_MSEC)           # current position of the file relative to the start.
+        if not args.layer:
+            delta = stream.get(cv2.CAP_PROP_POS_MSEC)           # current position of the file relative to the start.
+        else: 
+            delta += (1.0/clip_info.fps) * 1000
+        
         tdelta = datetime.timedelta(milliseconds=delta)
         current_time = clip_info.creation_date + tdelta     # absolute pointer from the begining of the video.
         
@@ -520,7 +510,8 @@ if __name__ == "__main__":
         # set here the graphics, etc.
         #
         if args.layer:
-            sf = cvimage_to_pygame(background_surface_np)
+            sf = pygame.image.frombuffer(background_surface_np.tobytes(), background_surface_np.shape[1::-1], "BGRA")
+            #sf = cvimage_to_pygame(background_surface_np)
         else:
             sf = cvimage_to_pygame(frame)
 
@@ -540,14 +531,15 @@ if __name__ == "__main__":
 
         # show the frame to our screen and increment the frame counter
 
-        if args.show:
-            cv2.imshow("Frame", frame)
-        #key = cv2.waitKey(1) & 0xFF
-        key = cv2.pollKey()
+        if not args.layer:
+            if args.show:
+                cv2.imshow("Frame", frame)
+            #key = cv2.waitKey(1) & 0xFF
+            key = cv2.pollKey()
 
-        # if the 'q' key is pressed, stop the loop
-        if key == ord("q"):
-            break
+            # if the 'q' key is pressed, stop the loop
+            if key == ord("q"):
+                break
         
 
 
@@ -575,3 +567,5 @@ if __name__ == "__main__":
     if args.small:
         ffmpeg_helper.GenerateLowRes(args.video_file, args.output_file, cache=not args.no_cache)
    
+   # blend things
+   # C:\software\ffmpeg\ffmpeg -ss 0 -t 5 -i .\samples\Fresnedillas-Robledo-ROAD\video2.mp4 -i .\samples\Fresnedillas-Robledo-ROAD\output.avi -filter_complex "[0:v] format=rgba [bg]; [1:v] format=rgba [fg]; [bg][fg] blend=all_mode='multiply':all_opacity=1, format=rgba"  .\samples\Fresnedillas-Robledo-ROAD\xxx.avi
