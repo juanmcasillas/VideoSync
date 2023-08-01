@@ -41,7 +41,7 @@ def DistanceI(A, B, tdelta, tag=""):
     if type(tdelta) != float:
         tdelta = getseconds(tdelta) + (tdelta.microsecond / 1000000.0) - x1
     
-    goal = interp(x1 + tdelta, [float(x1), float(x2) ], [ 0.0, d])
+    goal = np.interp(x1 + tdelta, [float(x1), float(x2) ], [ 0.0, d])
     #print("%s A(%3.6f, %3.6f) B(%3.6f, %3.6f) Goal: %3.6f -> %3.6f" % (tag, x1,0,x2,d, x1 + tdelta, goal))
     return goal    
     
@@ -104,7 +104,7 @@ def Interpolate( x1, y1, x2, y2, tdelta ):
 
 
 
-    goal = interp(x1 + tdelta, [float(x1), float(x2) ], [ float(y1), float(y2)])
+    goal = np.interp(x1 + tdelta, [float(x1), float(x2) ], [ float(y1), float(y2)])
     #print("A(%3.6f, %3.6f) B(%3.6f, %3.6f) Goal: %3.6f -> %3.6f" % (x1,y1,x2,y2, x1 + tdelta, goal))
     return goal
 

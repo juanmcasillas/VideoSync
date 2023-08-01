@@ -203,8 +203,12 @@ if __name__ == "__main__":
     parser.add_argument("-v", "--verbose", help="Show data about file and processing", action="count")
     parser.add_argument("-l", "--layer", help="Create a layer to use in Final Cut (Overlay)", action="store_true")
     parser.add_argument("-s", "--show", help="Show frames during encoding", action="store_true")
+    parser.add_argument("-x", "--small", help="Generate fast, small, low quality video", action="store_true")
     parser.add_argument("-i", "--only-info", help="Show info then exit", action="store_true", default=False)
+    parser.add_argument("-c", "--no-cache", help="Don't use file cache", action="store_true", default=False)
     parser.add_argument("-g", "--gopro", help="Read the GPX data from goproFile", action="store_true", default=False)
+    parser.add_argument("-f", "--fix-gopro", help="Remove all tracks and process only video (gopro Fix)", action="store_true", default=False)
+
     parser.add_argument("-t", "--title", help="Title to write")
     parser.add_argument("config_file", help="XML configuration file")
     parser.add_argument("gpx_file", help="GPX 1.1 file [fit|gpx]")
@@ -213,10 +217,19 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     hrmmanager = HRMManager(verbose=args.verbose)
-    stream = cv2.VideoCapture(args.video_file)
+    ffmpeg_helper = FFMPEGAdapter()
+
+    if not args.fix_gopro:
+        stream = cv2.VideoCapture(args.video_file)
+    else:
+        # remove first all the tracks, leave only the video
+        # use the no sound video as source.
+        #
+        f_name = ffmpeg_helper.GetOnlyVideoTrack(args.video_file, cache=not args.no_cache)
+        stream = cv2.VideoCapture(f_name)
+        print("Using %s as input stream (fix-Gopro=True)" % f_name)
+    
     clip_info = ClipInfo(args.video_file, stream, offset=args.offset, duration=args.duration)
-
-
 
     clip_info.show_video_info()
 
@@ -427,12 +440,12 @@ if __name__ == "__main__":
         # skip the offset and calculate duration
 
         if datetime.timedelta(milliseconds=delta).total_seconds() < clip_info.offset:
-            if args.verbose >2:
+            if args.verbose >3:
                 print("CROPPING: Skipping frame %3.3f" % tdelta.total_seconds())
             continue
  
         if current_time > clip_info.start_time + datetime.timedelta(seconds=clip_info.crop_duration):
-            if args.verbose >2:
+            if args.verbose >3:
                 print("CROPPING: duration reached, exit")
             break
 
@@ -553,15 +566,12 @@ if __name__ == "__main__":
     cv2.destroyAllWindows()
     pygame.quit()
     
-    ## TODO
     # create and restore the file
-    encoder = FFMPEGAdapter()
-    encoder.CopyAudioStream(args.video_file, args.output_file, offset=clip_info.offset, duration=clip_info.crop_duration)
+    ffmpeg_helper.CopyAudioStream(args.video_file, args.output_file, 
+                            offset=clip_info.offset, 
+                            duration=clip_info.crop_duration, 
+                            fps=clip_info.fps)
 
-
-    # working
-    # http://b.tile.openstreetmap.org/19/255795/197932.png
-    # 
-    # non working
-    # http://b.tile.openstreetmap.org/19/1023205/791754.png
-    # http://b.tile.openstreetmap.org/21/1023205/791754.png
+    if args.small:
+        ffmpeg_helper.GenerateLowRes(args.video_file, args.output_file, cache=not args.no_cache)
+   

@@ -11,6 +11,7 @@ from xml.dom.minidom import *
 from baseconfig import *
 from PIL import Image
 from metrics import *
+import gpxtoolbox
 
 class EmptyClass:
   pass
@@ -775,19 +776,16 @@ class OSMMapGauge(OneValueGauge):
         self.mapper       = OSMMapper(self.img_size)
         #map         = mapper.GetMapBB((NW,NE,SE,SW), mapempty=False)
 
-        self.mapimg = self.mapper.GetMapBB((NW,NE,SE,SW), mapempty=self.config.map.empty, mapcolor=self.config.colors.bg.colortuple, bounding_box=False)
+        self.mapimg = self.mapper.GetMapBB((NW,NE,SE,SW), mapempty=self.config.map.empty, 
+                                           mapcolor=self.config.colors.bg.colortuple, 
+                                           bounding_box=False)
         #mapimg = mapper.GetMapCentered(gpx_point, 200, mapempty=True, bounding_box=False)
 
 
     def update(self, values, current_time=None):
         # map problem here
         self.gpx_point_index = values[0]
-        #if self.gpx_point_index in (0, len(self.gpx_points)):
-        #if self.gpx_point_index:
         self.gpx_point = self.gpx_points[self.gpx_point_index]
-        #else:
-        #    print(self.gpx_point_index)
-        #    print("Warning, point out of bounds. FIT/GPX file matches Video?")
         self.current_time = current_time
 
     def set_points(self, points):
@@ -808,7 +806,7 @@ class OSMMapGauge(OneValueGauge):
 
         if self.config.interpolate:
             distance_i = DistanceI( self.gpx_points[self.gpx_point_index-1], self.gpx_points[self.gpx_point_index], self.current_time )
-            bearing = geo.bearing(self.gpx_points[self.gpx_point_index-1] , self.gpx_points[self.gpx_point_index])
+            bearing = gpxtoolbox.bearing(self.gpx_points[self.gpx_point_index-1] , self.gpx_points[self.gpx_point_index])
 
             interpolated_point = geo.LocationDelta(distance=distance_i, angle=bearing)
             lat, lon = interpolated_point.move_by_angle_and_distance(self.gpx_point)

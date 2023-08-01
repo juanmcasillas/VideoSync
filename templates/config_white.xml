@@ -242,7 +242,6 @@
     </fonts>
 </altgraph>
 
-
 <bearing label="DEG" metric="bearing" halign="LEFT">
     <position x="LEFT+10" y="TOP+90" />
     <compass width="60" height="60" alpha="200" markradius="2" pointradius="3" ygap="15" png="resources/arrow.png"/>
@@ -285,7 +284,6 @@
       <mark fontname="DEFAULT" size="DEFAULT-24" />
     </fonts>
 </ecg> -->
-
 
 <picture label="" metric="" halign="CENTER">
     <position x="CX" y="CY" />

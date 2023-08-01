@@ -19,6 +19,8 @@ import cv2
 import pygame
 import urllib.request
 from urllib.request import Request, urlopen
+import datetime
+import timecode
 
 import json
 
@@ -110,16 +112,75 @@ class FFMPEGAdapter:
             self.ffmpeg = "ffmpeg"
             self.ffprobe = "ffprobe"
 
-    def CopyAudioStream(self, sourcefile, destfile, offset=0, duration=0):
+    def seconds_to_smtpe(self, duration, fps):
+        c = datetime.datetime.utcfromtimestamp(duration)
+        t = timecode.Timecode(fps, c.strftime("%H:%M:%S.%f"))
+        t.set_fractional(True)
+        return repr(t)
+
+    def GetOnlyVideoTrack(self, video_file, cache=True):
+        filename, file_extension = os.path.splitext(video_file)
+        destfile = "%s_nosound%s" % (filename, file_extension)
+  
+        if os.path.exists(destfile) and cache:
+            return(destfile)
+               
+        # https://stackoverflow.com/questions/38161697/how-to-remove-one-track-from-video-file-using-ffmpeg
+        # ffmpeg -i input -map 0:v -map 0:a -c copy output
+        # remove audio track -i .\GH011502.MP4 -c copy -an .\GH011502_NS.MP4
+        cmd = [ self.ffmpeg, "-y", "-loglevel", "info", 
+                "-i", "%s" % video_file, 
+                "-map", "0:v", 
+                "-map", "-0:a?", # audio
+                "-map", "-0:s?", # subtitles
+                "-map", "-0:d?", # data
+                "-map", "-0:t?", # attachments
+                "-c", "copy",
+                "%s" % destfile ]
+        print(( "Removing all tracks except video from %s to %s" % (video_file, destfile)))
+        print(("Invoking: " + " ".join(cmd)))
+        out,err  = self._run( cmd )
+        return (destfile)
+                
+    def GenerateLowRes(self, video_file, source_file, cache=True):
+        filename, file_extension = os.path.splitext(video_file)
+        destfile = "%s_lowres%s" % (filename, file_extension)
+  
+        # if os.path.exists(destfile) and cache:
+        #     return(destfile)
+        
+        cmd = [ self.ffmpeg, "-y", "-loglevel", "info", 
+                "-i", "%s" % source_file, 
+                "-filter:v", "scale=-1:720",
+                "-vcodec", "libx264",
+                "-crf", "24",
+                "-profile:v", "baseline",
+                "-pix_fmt", "yuv420p",
+                "-movflags",
+                "+faststart",
+                "%s" % destfile ]
+        
+        print(( "Generating low res file from %s to %s" % (source_file, destfile)))
+        print(("Invoking: " + " ".join(cmd)))
+        out,err  = self._run( cmd )
+        return (destfile)
+
+
+    def CopyAudioStream(self, sourcefile, destfile, offset=0, duration=0, fps=0):
         outfile = next(tempfile._get_candidate_names()) + os.path.splitext(sourcefile)[1]
         #cmd = "%s -i '%s' -i '%s' -c copy -map 0:1 -map 1:0 -shortest '%s'" % (self.ffmpeg, sourcefile, destfile, outfile)
         
+        # use smtpe mark, but decimal places
+        # can't be managed (bad result in audio)
+
+        offset = self.seconds_to_smtpe(offset, fps)
+        duration = self.seconds_to_smtpe(duration, fps)
         
         cmd = [ self.ffmpeg, "-loglevel", "info",  ]
 
-        cmd += [ "-ss", "%f" % offset ]
+        cmd += [ "-ss", "%s" % offset ]
         
-        cmd += [ "-t", "%f" % duration ]
+        cmd += [ "-t", "%s" % duration ]
      
      
         # "-shortest" removed using crop
